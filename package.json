@@ -1,0 +1,8 @@
+{
+  "name": "tentacle-pro",
+  "private": true,
+  "workspaces": [
+    "api",
+    "packages/*"
+  ]
+}
