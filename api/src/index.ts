@@ -13,6 +13,8 @@ import { healthRouter } from './routes/health'
 import { markdown2htmlRouter } from './routes/markdown2html'
 import { uploadRouter } from './routes/upload'
 import { draftRouter } from './routes/draft'
+import { templatesRouter } from './routes/templates'
+import { assetsRouter } from './routes/assets'
 
 const app = new Hono<{ Variables: AppVariables }>()
 
@@ -38,6 +40,8 @@ v1.use('*', authMiddleware)
 v1.use('*', auditMiddleware)
 
 v1.route('/markdown2html', markdown2htmlRouter)
+v1.route('/templates', templatesRouter)
+v1.route('/assets', assetsRouter)
 v1.route('/post2wechat/upload', uploadRouter)
 v1.route('/post2wechat/draft', draftRouter)
 

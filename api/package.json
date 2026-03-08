@@ -9,6 +9,7 @@
     "@hono/zod-validator": "^0.5.0",
     "@tentacle-pro/core": "workspace:*",
     "@tentacle-pro/db": "workspace:*",
+    "@tentacle-pro/render": "workspace:*",
     "@tentacle-pro/wechat": "workspace:*",
     "hono": "^4.12.4",
     "zod": "^3.24.2"

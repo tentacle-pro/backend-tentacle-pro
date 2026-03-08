@@ -3,6 +3,9 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import type { ApiResponse, Markdown2HtmlResponse } from '@tentacle-pro/core'
 import { AppError, ErrorCode } from '@tentacle-pro/core'
+import { findTemplateById, buildAssetAliasMap } from '@tentacle-pro/db'
+import { convertMarkdownToHTML } from '@tentacle-pro/render'
+import type { TemplateConfig } from '@tentacle-pro/render'
 import type { AppVariables } from '../types'
 
 const markdown2htmlSchema = z.object({
@@ -20,58 +23,30 @@ markdown2htmlRouter.post(
     const { markdown, templateId } = c.req.valid('json')
     const requestId = c.get('requestId')
 
-    // TODO: 后续接入真实渲染引擎（marked / markdown-it + 模板系统）
-    if (!isSupportedTemplate(templateId)) {
+    const template = await findTemplateById(templateId)
+    if (!template) {
       throw new AppError(
         ErrorCode.RENDER_400_INVALID_TEMPLATE,
-        `Template "${templateId}" is not supported`,
+        `Template "${templateId}" not found`,
         400
       )
     }
 
-    const html = renderStub(markdown, templateId)
+    // 从 DB 读取素材别名映射，合并到 templateConfig.assets
+    const dbAssets = await buildAssetAliasMap()
+    const templateConfig = template.config as TemplateConfig
+    const configWithAssets: TemplateConfig = {
+      ...templateConfig,
+      assets: { ...dbAssets, ...(templateConfig.assets ?? {}) },
+    }
+
+    const result = await convertMarkdownToHTML(markdown, configWithAssets)
 
     const body: ApiResponse<Markdown2HtmlResponse> = {
       ok: true,
       request_id: requestId,
-      data: { html },
+      data: { html: result.html },
     }
     return c.json(body)
   }
 )
-
-// ─── Stub 实现 ─────────────────────────────────────────────────
-
-const SUPPORTED_TEMPLATES = ['default']
-
-function isSupportedTemplate(templateId: string): boolean {
-  return SUPPORTED_TEMPLATES.includes(templateId)
-}
-
-/**
- * Stub 渲染器：将 Markdown 按简单规则转为 HTML
- * TODO: 替换为真实 marked + 模板渲染逻辑
- */
-function renderStub(markdown: string, _templateId: string): string {
-  // 极简转换（仅供 stub / MVP 验收使用）
-  const lines = markdown.split('\n')
-  const html = lines
-    .map((line) => {
-      if (line.startsWith('# ')) return `<h1>${esc(line.slice(2))}</h1>`
-      if (line.startsWith('## ')) return `<h2>${esc(line.slice(3))}</h2>`
-      if (line.startsWith('### ')) return `<h3>${esc(line.slice(4))}</h3>`
-      if (line.trim() === '') return ''
-      return `<p>${esc(line)}</p>`
-    })
-    .filter(Boolean)
-    .join('\n')
-  return html
-}
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}

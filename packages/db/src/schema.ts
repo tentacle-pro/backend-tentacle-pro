@@ -3,6 +3,8 @@ import {
   text,
   timestamp,
   integer,
+  boolean,
+  jsonb,
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core'
@@ -99,5 +101,38 @@ export const publishAuditLogs = pgTable(
       t.clientId,
       t.createdAt
     ),
+  ]
+)
+
+// ─── templates ───────────────────────────────────────────────────────────────
+// 排版模板（平台统一管理，管理员维护）
+
+export const templates = pgTable('templates', {
+  id: text('id').primaryKey(), // e.g. "default-simple"
+  name: text('name').notNull(),
+  config: jsonb('config').notNull(), // TemplateConfig as JSONB
+  isDefault: boolean('is_default').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ─── render_assets ───────────────────────────────────────────────────────────
+// 渲染素材（本地磁盘，URL 为相对路径，后续可迁移 CDN）
+
+export const renderAssets = pgTable(
+  'render_assets',
+  {
+    id: text('id').primaryKey(), // nanoid
+    alias: text('alias').notNull(), // 模板里引用的别名，如 "divider"
+    filename: text('filename').notNull(), // 磁盘文件名，如 "abc123.png"
+    originalName: text('original_name').notNull(),
+    mimeType: text('mime_type').notNull(),
+    size: integer('size').notNull(), // bytes
+    url: text('url').notNull(), // e.g. /uploads/abc123.png
+    uploadedAt: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('render_assets_alias_idx').on(t.alias),
+    uniqueIndex('render_assets_filename_idx').on(t.filename),
   ]
 )
