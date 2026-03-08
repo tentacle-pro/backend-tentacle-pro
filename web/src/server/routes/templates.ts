@@ -22,6 +22,7 @@ adminTemplatesApp.get('/', async (c) => {
   const data = rows.map((t) => ({
     id: t.id,
     name: t.name,
+    config: t.config,
     isDefault: t.isDefault,
     createdAt: t.createdAt,
     updatedAt: t.updatedAt,

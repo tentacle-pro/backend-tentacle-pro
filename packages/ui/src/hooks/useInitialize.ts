@@ -28,7 +28,7 @@ export function useInitialize() {
 
         setTemplates(templates)
 
-        const defaultTemplate = templates.find((t) => t.isDefault) ?? templates[0]
+        const defaultTemplate = templates.find((t) => t.isDefault) ?? templates[0] ?? null
         if (defaultTemplate) {
           setCurrentTemplate(defaultTemplate)
         }
