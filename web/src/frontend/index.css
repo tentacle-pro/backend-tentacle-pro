@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@source "../../";
+@source "../../../packages/ui/src";
+
+/* WeChat preview content styles */
+.wechat-preview {
+  max-width: 677px;
+}
