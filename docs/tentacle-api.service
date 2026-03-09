@@ -11,7 +11,7 @@ WorkingDirectory=/root/backend-tentacle-pro
 # 生产环境变量，读取 EnvironmentFile
 EnvironmentFile=/root/backend-tentacle-pro/.env
 
-ExecStart=/root/.bun/bin/bun run api/src/index.ts
+ExecStart=/root/.bun/bin/bun api/src/index.ts
 
 Restart=always
 RestartSec=5
