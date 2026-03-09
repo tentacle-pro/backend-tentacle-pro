@@ -1,0 +1,24 @@
+[Unit]
+Description=Tentacle Pro — External API Service (port 3001)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root/backend-tentacle-pro
+
+# 生产环境变量，读取 EnvironmentFile
+EnvironmentFile=/root/backend-tentacle-pro/.env
+
+ExecStart=/root/.bun/bin/bun run api/src/index.ts
+
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tentacle-api
+
+[Install]
+WantedBy=multi-user.target
