@@ -6,12 +6,9 @@ After=network.target postgresql.service
 Type=simple
 User=root
 Group=root
-WorkingDirectory=/root/backend-tentacle-pro
+WorkingDirectory=/root/backend-tentacle-pro/api
 
-# 生产环境变量，读取 EnvironmentFile
-EnvironmentFile=/root/backend-tentacle-pro/.env
-
-ExecStart=/root/.bun/bin/bun api/src/index.ts
+ExecStart=/root/.bun/bin/bun --env-file /root/backend-tentacle-pro/.env src/index.ts
 
 Restart=always
 RestartSec=5
