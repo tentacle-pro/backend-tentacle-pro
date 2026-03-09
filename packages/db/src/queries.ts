@@ -89,3 +89,57 @@ export async function buildAssetAliasMap(): Promise<Record<string, string>> {
   }
   return map
 }
+
+// ─── Admin write helpers ──────────────────────────────────────────────────────
+
+/** 新增 API 客户端（api_key_hash 由调用方提前计算好后传入） */
+export async function createApiClient(input: {
+  id: string
+  name: string
+  apiKeyHash: string
+  plan?: string
+  status?: string
+}) {
+  const db = getDb()
+  await db.insert(apiClients).values({
+    id: input.id,
+    name: input.name,
+    apiKeyHash: input.apiKeyHash,
+    plan: input.plan ?? 'free',
+    status: input.status ?? 'active',
+  })
+}
+
+/** 新增微信公众号账号（appSecretEncrypted 由调用方提前加密后传入） */
+export async function createWechatAccount(input: {
+  id: string
+  appId: string
+  appSecretEncrypted: string
+  accountName: string
+  status?: string
+}) {
+  const db = getDb()
+  await db.insert(wechatAccounts).values({
+    id: input.id,
+    appId: input.appId,
+    appSecretEncrypted: input.appSecretEncrypted,
+    accountName: input.accountName,
+    status: input.status ?? 'active',
+  })
+}
+
+/** 新增客户端-公众号绑定 */
+export async function createClientAccountBinding(input: {
+  id: string
+  clientId: string
+  wechatAccountId: string
+  permissionScope?: string
+}) {
+  const db = getDb()
+  await db.insert(clientAccountBindings).values({
+    id: input.id,
+    clientId: input.clientId,
+    wechatAccountId: input.wechatAccountId,
+    permissionScope: input.permissionScope ?? 'full',
+  })
+}

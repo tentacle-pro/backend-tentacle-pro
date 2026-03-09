@@ -48,7 +48,7 @@ uploadRouter.post('/permanent-image', async (c) => {
     imageUrl = body.image_url
   }
 
-  const mediaId = await uploadPermanentImage(wechatAccountId, {
+  const { mediaId, url: mediaUrl } = await uploadPermanentImage(wechatAccountId, {
     mediaFile,
     imageUrl,
     filename,
@@ -57,7 +57,7 @@ uploadRouter.post('/permanent-image', async (c) => {
   const resp: ApiResponse<UploadPermanentImageResponse> = {
     ok: true,
     request_id: requestId,
-    data: { media_id: mediaId },
+    data: { media_id: mediaId, url: mediaUrl },
   }
   return c.json(resp)
 })

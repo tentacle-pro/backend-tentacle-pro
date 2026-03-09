@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "postgres": {
+      "command": "/opt/homebrew/bin/toolbox",
+      "args": ["--prebuilt","postgres","--stdio","-p","5002"],
+      "env": {
+        "POSTGRES_HOST": "127.0.0.1",
+        "POSTGRES_PORT": "5432",
+        "POSTGRES_DATABASE": "tentacle_pro_db",
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "dswybs-yoqoo"
+      }
+    }
+  }
+}
+

@@ -57,7 +57,7 @@ async function buildFormData(
 export async function uploadPermanentImage(
   wechatAccountId: string,
   opts: { mediaFile?: File | Blob; imageUrl?: string; filename?: string }
-): Promise<string> {
+): Promise<{ mediaId: string; url?: string }> {
   let accessToken = await getAccessToken(wechatAccountId)
 
   const doUpload = async (token: string): Promise<WxAddMaterialResponse> => {
@@ -90,7 +90,7 @@ export async function uploadPermanentImage(
     )
   }
 
-  return result.media_id
+  return { mediaId: result.media_id, url: result.url }
 }
 
 // ─── 上传正文图（uploadimg）──────────────────────────────────────────────

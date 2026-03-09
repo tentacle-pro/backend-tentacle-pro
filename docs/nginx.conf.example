@@ -1,0 +1,124 @@
+# Nginx 反向代理配置示例
+# 适用于 tentacle.pro（后台 Web）+ api.tentacle.pro（API 服务）
+#
+# 前提条件：
+#   - Web 服务  运行在 127.0.0.1:3000（bun run web/src/index.ts）
+#   - API 服务  运行在 127.0.0.1:3001（bun run api/src/index.ts）
+#   - 已用 certbot 生成 TLS 证书：
+#       certbot --nginx -d tentacle.pro -d api.tentacle.pro
+#
+# 使用方式：
+#   sudo cp docs/nginx.conf.example /etc/nginx/conf.d/tentacle.conf
+#   sudo nginx -t && sudo systemctl reload nginx
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# ─────────────────────────────────────────────
+# tentacle.pro  →  Web 后台管理（端口 3000）
+# ─────────────────────────────────────────────
+
+server {
+    listen 80;
+    server_name tentacle.pro www.tentacle.pro;
+    # certbot 会自动插入重定向，以下为手动写法
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name tentacle.pro www.tentacle.pro;
+
+    ssl_certificate     /etc/letsencrypt/live/tentacle.pro/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tentacle.pro/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+
+    # 安全响应头
+    add_header X-Frame-Options        SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header Referrer-Policy        strict-origin-when-cross-origin;
+
+    # Bun 静态资源缓存（hash 文件名，永久缓存）
+    location ~* ^/_bun/asset/ {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+        expires            1y;
+        add_header         Cache-Control "public, immutable";
+    }
+
+    # 主应用反向代理
+    location / {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket 支持（HMR 开发模式 / 未来 WS 功能）
+        proxy_set_header Upgrade    $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        proxy_connect_timeout 10s;
+        proxy_send_timeout    60s;
+        proxy_read_timeout    60s;
+    }
+}
+
+# ─────────────────────────────────────────────
+# api.tentacle.pro  →  外部 API 服务（端口 3001）
+# ─────────────────────────────────────────────
+
+server {
+    listen 80;
+    server_name api.tentacle.pro;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name api.tentacle.pro;
+
+    ssl_certificate     /etc/letsencrypt/live/tentacle.pro/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tentacle.pro/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+
+    add_header X-Frame-Options        DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header Referrer-Policy        strict-origin-when-cross-origin;
+
+    # 上传文件大小限制（封面图 + 正文插图）
+    client_max_body_size 20m;
+
+    # 静态素材文件（assets/）
+    location /assets/ {
+        proxy_pass         http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+        expires            7d;
+        add_header         Cache-Control "public";
+    }
+
+    # API 路由
+    location / {
+        proxy_pass         http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 10s;
+        proxy_send_timeout    120s;
+        proxy_read_timeout    120s;
+    }
+}

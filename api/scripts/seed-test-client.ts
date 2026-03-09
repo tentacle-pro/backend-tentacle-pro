@@ -6,9 +6,10 @@
  */
 
 import { getDb, apiClients, wechatAccounts, clientAccountBindings, eq } from '@tentacle-pro/db'
-import { sha256Hex } from '@tentacle-pro/core'
+import { sha256Hex, encrypt } from '@tentacle-pro/core'
 
 const TEST_API_KEY = 'test-api-key-local-dev-only'
+const TEST_WECHAT_APP_SECRET = 'wx-placeholder-secret-local'
 const TEST_CLIENT_ID = 'test-client-001'
 const TEST_WECHAT_ID = 'test-wechat-account-001'
 const TEST_BINDING_ID = 'test-binding-001'
@@ -16,6 +17,7 @@ const TEST_BINDING_ID = 'test-binding-001'
 async function main() {
   const db = getDb()
   const keyHash = await sha256Hex(TEST_API_KEY)
+  const appSecretEncrypted = await encrypt(TEST_WECHAT_APP_SECRET)
 
   // 幂等地插入测试客户端
   const existing = await db.query.apiClients.findFirst({
@@ -44,11 +46,15 @@ async function main() {
     await db.insert(wechatAccounts).values({
       id: TEST_WECHAT_ID,
       appId: 'wx_test_placeholder',
-      appSecretEncrypted: 'placeholder-secret',
+      appSecretEncrypted,
       accountName: '测试公众号（占位）',
       status: 'active',
     })
     console.log('✅ 创建占位公众号账号')
+  } else {
+    // 重新加密并更新（防止密钥轮换或旧记录存的是明文）
+    await db.update(wechatAccounts).set({ appSecretEncrypted }).where(eq(wechatAccounts.id, TEST_WECHAT_ID))
+    console.log('ℹ️  占位公众号账号已存在，已更新加密 secret')
   }
 
   // 幂等地插入绑定关系

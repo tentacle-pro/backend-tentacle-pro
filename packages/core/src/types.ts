@@ -61,6 +61,7 @@ export interface Markdown2HtmlResponse {
 
 export interface UploadPermanentImageResponse {
   media_id: string
+  url?: string
 }
 
 export interface UploadArticleImageResponse {

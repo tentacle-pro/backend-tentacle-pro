@@ -5,6 +5,7 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
+    "@tentacle-pro/core": "workspace:*",
     "@tentacle-pro/db": "workspace:*",
     "@tentacle-pro/render": "workspace:*",
     "@tentacle-pro/ui": "workspace:*",

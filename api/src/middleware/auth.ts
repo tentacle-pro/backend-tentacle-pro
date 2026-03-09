@@ -15,7 +15,10 @@ function extractApiKey(authHeader: string | undefined, apiKeyHeader: string | un
   return null
 }
 
-/** 校验 API_KEY、解析客户端与绑定的公众号账号 */
+/**
+ * 校验 APP_SECRET（Bearer token）、解析客户端与绑定的公众号账号
+ * 可选：客户端同时发送 X-App-ID 头部，服务端做二次确认
+ */
 export const authMiddleware: MiddlewareHandler = async (c, next) => {
   const rawKey = extractApiKey(
     c.req.header('authorization'),
@@ -37,6 +40,16 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
     throw new AppError(
       ErrorCode.AUTH_401_INVALID_API_KEY,
       'Invalid or inactive API key',
+      401
+    )
+  }
+
+  // 可选二次验证：如果客户端提供了 X-App-ID，必须与 DB 中 client.id 匹配
+  const appId = c.req.header('x-app-id')
+  if (appId && appId !== client.id) {
+    throw new AppError(
+      ErrorCode.AUTH_401_INVALID_API_KEY,
+      'X-App-ID does not match the provided credentials',
       401
     )
   }
