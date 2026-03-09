@@ -109,7 +109,7 @@ curl -b cookies.txt -X POST http://localhost:3000/admin/clients \
     "client_id": "corp-a",
     "client_name": "Corp A",
     "api_secret": "tentacle-xxxxxxxxxxxxxxxxxxxxxxxx",
-    "wechat_app_id": "wx1234567890abcdef",
+    "wechat_app_id": "your-wechat-app-id",
     "wechat_app_secret": "your-wechat-app-secret",
     "account_name": "Corp A 公众号"
   }'
