@@ -1,6 +1,6 @@
 import honoApp from './server/app'
 // @ts-ignore — Bun HTML import
-import indexHtml from '../public/index.html'
+import indexHtml from '../index.html'
 
 const PORT = Number(process.env.WEB_PORT ?? 3000)
 
