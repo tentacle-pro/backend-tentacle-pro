@@ -9,7 +9,7 @@ Group=root
 # 必须以 web/ 为工作目录，Bun 才能找到 web/bunfig.toml（含 bun-plugin-tailwind）
 WorkingDirectory=/root/backend-tentacle-pro/web
 
-ExecStart=/root/.bun/bin/bun --env-file /root/backend-tentacle-pro/.env src/index.ts
+ExecStart=/root/.bun/bin/bun --env-file=/root/backend-tentacle-pro/.env src/index.ts
 
 Restart=always
 RestartSec=5

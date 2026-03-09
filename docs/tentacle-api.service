@@ -8,7 +8,7 @@ User=root
 Group=root
 WorkingDirectory=/root/backend-tentacle-pro/api
 
-ExecStart=/root/.bun/bin/bun --env-file /root/backend-tentacle-pro/.env src/index.ts
+ExecStart=/root/.bun/bin/bun --env-file=/root/backend-tentacle-pro/.env src/index.ts
 
 Restart=always
 RestartSec=5
