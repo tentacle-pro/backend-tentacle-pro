@@ -47,6 +47,9 @@ bun -e "console.log(Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toSt
 
 ```bash
 cd packages/db
+bun run db:generate
+docker exec -it postgresql-vector-age-pgmq psql -U postgres
+>CREATE DATABASE tentacle_pro_db;
 bun run db:migrate
 ```
 
@@ -148,6 +151,8 @@ cd packages/db
 
 # 生成新 migration
 bun run db:generate
+docker exec -it postgresql-vector-age-pgmq psql -U postgres
+CREATE DATABASE tentacle_pro_db;
 
 # 执行 migration
 bun run db:migrate

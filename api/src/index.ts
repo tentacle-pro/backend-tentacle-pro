@@ -62,7 +62,7 @@ app.notFound((c) => {
   )
 })
 
-const PORT = Number(process.env.PORT ?? 3001)
+const PORT = Number(process.env.API_PORT ?? 3001)
 
 console.log(
   JSON.stringify({
