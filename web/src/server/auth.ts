@@ -5,8 +5,8 @@ import { sign, verify } from 'hono/jwt'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 
-const JWT_SECRET = process.env.ADMIN_JWT_SECRET ?? 'change-me-in-production'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123'
+const JWT_SECRET = process.env.ADMIN_JWT_SECRET ?? '<replace-with-your-jwt-secret>'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? '<replace-with-your-admin-password>'
 const COOKIE_NAME = '__session'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 

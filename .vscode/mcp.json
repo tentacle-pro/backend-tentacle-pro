@@ -8,7 +8,7 @@
         "POSTGRES_PORT": "5432",
         "POSTGRES_DATABASE": "tentacle_pro_db",
         "POSTGRES_USER": "postgres",
-        "POSTGRES_PASSWORD": "dswybs-yoqoo"
+        "POSTGRES_PASSWORD": "${env:_DB_PASS}"
       }
     }
   }
