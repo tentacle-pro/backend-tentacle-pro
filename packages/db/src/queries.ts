@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { getDb } from './client'
 import { apiClients, clientAccountBindings, wechatAccounts, templates, renderAssets } from './schema'
 
@@ -10,6 +10,39 @@ export async function findClientByKeyHash(keyHash: string) {
   return db.query.apiClients.findFirst({
     where: eq(apiClients.apiKeyHash, keyHash),
   })
+}
+
+/** 通过 client_id 查找客户端 */
+export async function findClientById(clientId: string) {
+  const db = getDb()
+  return db.query.apiClients.findFirst({
+    where: eq(apiClients.id, clientId),
+  })
+}
+
+/** 列出所有客户端及其绑定公众号信息 */
+export async function listClientsWithBindings() {
+  const db = getDb()
+  return db
+    .select({
+      clientId: apiClients.id,
+      clientName: apiClients.name,
+      clientStatus: apiClients.status,
+      clientPlan: apiClients.plan,
+      clientCreatedAt: apiClients.createdAt,
+      clientUpdatedAt: apiClients.updatedAt,
+      wechatAccountId: wechatAccounts.id,
+      wechatAppId: wechatAccounts.appId,
+      wechatAccountName: wechatAccounts.accountName,
+      wechatStatus: wechatAccounts.status,
+      bindingId: clientAccountBindings.id,
+      permissionScope: clientAccountBindings.permissionScope,
+      bindingCreatedAt: clientAccountBindings.createdAt,
+    })
+    .from(apiClients)
+    .leftJoin(clientAccountBindings, eq(clientAccountBindings.clientId, apiClients.id))
+    .leftJoin(wechatAccounts, eq(wechatAccounts.id, clientAccountBindings.wechatAccountId))
+    .orderBy(desc(apiClients.createdAt))
 }
 
 /** 通过 client_id 查找绑定的公众号账号 */
@@ -25,6 +58,14 @@ export async function findWechatAccountById(id: string) {
   const db = getDb()
   return db.query.wechatAccounts.findFirst({
     where: eq(wechatAccounts.id, id),
+  })
+}
+
+/** 通过 app_id 查找公众号账号 */
+export async function findWechatAccountByAppId(appId: string) {
+  const db = getDb()
+  return db.query.wechatAccounts.findFirst({
+    where: eq(wechatAccounts.appId, appId),
   })
 }
 
@@ -142,4 +183,28 @@ export async function createClientAccountBinding(input: {
     wechatAccountId: input.wechatAccountId,
     permissionScope: input.permissionScope ?? 'full',
   })
+}
+
+/** 更新客户端状态 */
+export async function updateApiClientStatus(input: { id: string; status: string }) {
+  const db = getDb()
+  await db
+    .update(apiClients)
+    .set({
+      status: input.status,
+      updatedAt: new Date(),
+    })
+    .where(eq(apiClients.id, input.id))
+}
+
+/** 更新客户端 API Key hash */
+export async function updateApiClientKeyHash(input: { id: string; apiKeyHash: string }) {
+  const db = getDb()
+  await db
+    .update(apiClients)
+    .set({
+      apiKeyHash: input.apiKeyHash,
+      updatedAt: new Date(),
+    })
+    .where(eq(apiClients.id, input.id))
 }

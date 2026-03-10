@@ -65,6 +65,9 @@ export function TemplatesPage() {
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold text-gray-800 mb-6">模板管理</h1>
+      <p className="text-xs text-gray-500 mb-4">
+        模板为平台全局共享资源，任意有效 API_KEY 可通过 templateId 使用任意模板。
+      </p>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <table className="w-full text-sm">

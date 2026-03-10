@@ -2,9 +2,10 @@ import React from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 const navItems = [
-  { to: '/dashboard/editor', label: '编辑器' },
+  { to: '/dashboard/editor', label: '在线编辑器' },
   { to: '/dashboard/templates', label: '模板管理' },
   { to: '/dashboard/assets', label: '素材管理' },
+  { to: '/dashboard/clients', label: '客户管理' },
 ]
 
 export function DashboardShell() {

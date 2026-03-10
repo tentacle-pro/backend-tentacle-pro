@@ -36,11 +36,19 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
   const keyHash = await sha256Hex(rawKey)
   const client = await findClientByKeyHash(keyHash)
 
-  if (!client || client.status !== 'active') {
+  if (!client) {
     throw new AppError(
       ErrorCode.AUTH_401_INVALID_API_KEY,
-      'Invalid or inactive API key',
+      'Invalid API key',
       401
+    )
+  }
+
+  if (client.status !== 'active') {
+    throw new AppError(
+      ErrorCode.AUTH_403_CLIENT_DISABLED,
+      'Client is disabled',
+      403
     )
   }
 

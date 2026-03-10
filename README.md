@@ -112,14 +112,15 @@ curl -b cookies.txt -X POST http://localhost:3000/admin/clients \
   -d '{
     "client_id": "corp-a",
     "client_name": "Corp A",
-    "api_secret": "tentacle-xxxxxxxxxxxxxxxxxxxxxxxx",
     "wechat_app_id": "your-wechat-app-id",
     "wechat_app_secret": "your-wechat-app-secret",
     "account_name": "Corp A 公众号"
   }'
+
+# 响应中会返回自动生成的 api_key，请复制给客户使用
 ```
 
-- `api_secret`：客户端填入技能中的 `API_KEY`，服务端只存 SHA-256 hash
+- `api_key`：由服务端自动生成，仅返回给管理员用于分发；服务端只存 SHA-256 hash
 - `wechat_app_secret`：公众号密钥，服务端 AES-GCM 加密后存库，明文不落库
 
 ## 鉴权设计
