@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 interface ClientItem {
   client_id: string
@@ -32,6 +32,19 @@ export function ClientsPage() {
   const [form, setForm] = useState<CreateClientForm>(emptyForm)
   const [creating, setCreating] = useState(false)
   const [lastApiKey, setLastApiKey] = useState('')
+  const [searchText, setSearchText] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'disabled'>('all')
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message })
+  }
+
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => setToast(null), 2200)
+    return () => clearTimeout(timer)
+  }, [toast])
 
   const loadClients = async () => {
     setLoading(true)
@@ -60,12 +73,26 @@ export function ClientsPage() {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
+  const filteredClients = useMemo(() => {
+    const keyword = searchText.trim().toLowerCase()
+    return clients.filter((item) => {
+      const matchesStatus = statusFilter === 'all' ? true : item.status === statusFilter
+      if (!matchesStatus) return false
+      if (!keyword) return true
+
+      return [item.client_id, item.client_name, item.account_name, item.wechat_app_id_masked]
+        .join(' ')
+        .toLowerCase()
+        .includes(keyword)
+    })
+  }, [clients, searchText, statusFilter])
+
   const copyText = async (text: string, successText = '已复制') => {
     try {
       await navigator.clipboard.writeText(text)
-      alert(successText)
+      showToast('success', successText)
     } catch {
-      alert('复制失败')
+      showToast('error', '复制失败')
     }
   }
 
@@ -73,7 +100,7 @@ export function ClientsPage() {
     e.preventDefault()
 
     if (!form.wechat_app_id.trim() || !form.wechat_app_secret.trim()) {
-      alert('请填写 APP_ID 与 APP_SECRET')
+      showToast('error', '请填写 APP_ID 与 APP_SECRET')
       return
     }
 
@@ -93,15 +120,16 @@ export function ClientsPage() {
 
       const data = await res.json()
       if (!data.ok) {
-        alert(data.error?.message || '创建失败')
+        showToast('error', data.error?.message || '创建失败')
         return
       }
 
       setLastApiKey(data.data.api_key)
       setForm(emptyForm)
+      showToast('success', '客户创建成功，已生成 API_KEY')
       await loadClients()
     } catch {
-      alert('网络错误')
+      showToast('error', '网络错误')
     } finally {
       setCreating(false)
     }
@@ -121,12 +149,13 @@ export function ClientsPage() {
       })
       const data = await res.json()
       if (!data.ok) {
-        alert(data.error?.message || `${actionText}失败`)
+        showToast('error', data.error?.message || `${actionText}失败`)
         return
       }
+      showToast('success', `${actionText}成功`)
       await loadClients()
     } catch {
-      alert('网络错误')
+      showToast('error', '网络错误')
     }
   }
 
@@ -139,19 +168,33 @@ export function ClientsPage() {
       })
       const data = await res.json()
       if (!data.ok) {
-        alert(data.error?.message || '重新生成失败')
+        showToast('error', data.error?.message || '重新生成失败')
         return
       }
 
       setLastApiKey(data.data.api_key)
-      alert('API_KEY 已重新生成')
+      showToast('success', 'API_KEY 已重新生成')
     } catch {
-      alert('网络错误')
+      showToast('error', '网络错误')
     }
   }
 
   return (
     <div className="p-6 space-y-6">
+      {toast && (
+        <div className="fixed top-4 right-4 z-50">
+          <div
+            className={`rounded-md px-3 py-2 text-sm shadow border ${
+              toast.type === 'success'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-red-50 text-red-700 border-red-200'
+            }`}
+          >
+            {toast.message}
+          </div>
+        </div>
+      )}
+
       <div>
         <h1 className="text-xl font-bold text-gray-800">客户管理</h1>
         <p className="text-xs text-gray-500 mt-1">
@@ -232,15 +275,33 @@ export function ClientsPage() {
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-200">
+        <div className="px-4 py-3 border-b border-gray-200 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <h2 className="text-sm font-semibold text-gray-700">客户列表</h2>
+
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <input
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="搜索客户 ID / 名称 / 公众号"
+              className="border border-gray-300 rounded px-3 py-1.5 text-sm min-w-60"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'disabled')}
+              className="border border-gray-300 rounded px-3 py-1.5 text-sm bg-white"
+            >
+              <option value="all">全部状态</option>
+              <option value="active">仅启用</option>
+              <option value="disabled">仅禁用</option>
+            </select>
+          </div>
         </div>
 
         {loading ? (
           <div className="px-4 py-8 text-sm text-gray-500">加载中...</div>
         ) : error ? (
           <div className="px-4 py-8 text-sm text-red-600">{error}</div>
-        ) : clients.length === 0 ? (
+        ) : filteredClients.length === 0 ? (
           <div className="px-4 py-8 text-sm text-gray-400">暂无客户</div>
         ) : (
           <div className="overflow-auto">
@@ -257,7 +318,7 @@ export function ClientsPage() {
                 </tr>
               </thead>
               <tbody>
-                {clients.map((item) => (
+                {filteredClients.map((item) => (
                   <tr key={item.client_id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-4 py-3 font-mono text-xs text-gray-700">{item.client_id}</td>
                     <td className="px-4 py-3 text-gray-800">{item.client_name}</td>
