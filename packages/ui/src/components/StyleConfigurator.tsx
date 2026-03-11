@@ -70,7 +70,7 @@ export function StyleConfigurator() {
   const config: TemplateConfig = tempConfig ||
     currentTemplate?.config || { global: {}, variables: {}, styles: {} }
   const globalConfig = config.global || {}
-  const isDefaultTemplate = currentTemplate?.isDefault === true
+  const isReadOnlyTemplate = currentTemplate?.canEditConfig === false
 
   const toastApiError = (action: string, payload: unknown, fallback: string) =>
     showActionErrorToast(showToast, action, payload, fallback)
@@ -209,7 +209,7 @@ export function StyleConfigurator() {
 
   const handlePrimarySave = async () => {
     if (!currentTemplate) return
-    if (isDefaultTemplate) {
+    if (isReadOnlyTemplate) {
       setTemplateNameInput('')
       setDialogMode('saveAs')
       return
@@ -237,7 +237,7 @@ export function StyleConfigurator() {
   }
 
   const handleDeleteTemplate = async () => {
-    if (!currentTemplate || isDefaultTemplate) return
+    if (!currentTemplate || isReadOnlyTemplate) return
     const proceed = confirmDiscardIfNeeded(
       '当前有未保存修改，删除并切换模板将丢失这些修改，是否继续？',
     )
@@ -388,6 +388,11 @@ export function StyleConfigurator() {
               复制 cURL
             </button>
           </div>
+          {isReadOnlyTemplate && (
+            <p className="mt-1 text-[11px] text-amber-700">
+              当前为预置模板，请通过“另存为”创建可编辑副本。
+            </p>
+          )}
         </div>
       </div>
 
@@ -508,7 +513,7 @@ export function StyleConfigurator() {
             onClick={handlePrimarySave}
             className="flex-1 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
           >
-            {isDefaultTemplate ? '另存为' : '保存模板'}
+            {isReadOnlyTemplate ? '另存为' : '保存模板'}
           </button>
 
           <div className="relative" ref={menuRef}>
@@ -534,19 +539,19 @@ export function StyleConfigurator() {
                 </button>
                 <button
                   onClick={() => {
-                    if (!currentTemplate || isDefaultTemplate) return
+                    if (!currentTemplate || isReadOnlyTemplate) return
                     setTemplateNameInput(currentTemplate.name)
                     setDialogMode('rename')
                     setIsMenuOpen(false)
                   }}
-                  disabled={isDefaultTemplate}
+                  disabled={isReadOnlyTemplate}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   改名
                 </button>
                 <button
                   onClick={handleDeleteTemplate}
-                  disabled={isDefaultTemplate}
+                  disabled={isReadOnlyTemplate}
                   className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   删除

@@ -77,7 +77,9 @@ export async function convertTailwindToInline(
       resolvedStyles[prop] = resolveCssValue(value, allVars)
     }
 
-    const { filtered, warnings } = filterUnsupportedStyles(expandLogicalProperties(resolvedStyles))
+    const { filtered, warnings } = filterUnsupportedStyles(
+      remToPx(simplifyCalcValues(expandLogicalProperties(resolvedStyles)))
+    )
 
     const unresolved = classList.filter((cls) => !matchedClasses.has(cls))
     if (unresolved.length > 0) {
@@ -223,6 +225,56 @@ function filterUnsupportedStyles(
   }
 
   return { filtered, warnings }
+}
+
+/**
+ * 将内联样式中的 rem 单位换算为 px（1rem = 16px）
+ * 微信 WebView 对 rem 单位支持不稳定，呈现差异大，一律换算为 px 更可靠
+ */
+function remToPx(styles: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [prop, value] of Object.entries(styles)) {
+    result[prop] = value.replace(/([-\d.]+)rem/g, (_match, num) => {
+      const px = Math.round(parseFloat(num) * 16 * 100) / 100
+      return `${px}px`
+    })
+  }
+  return result
+}
+
+/**
+ * 计算简单的 calc() 乘除表达式，微信 WebView 不支持 calc() 内联样式
+ * e.g. calc(0.25rem * 8) → 2rem，calc(100% / 3) → 33.3333%
+ */
+function simplifyCalcValues(styles: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {}
+  const simplify = (expr: string): string => {
+    const t = expr.trim()
+    // NUMBER_WITH_UNIT * NUMBER
+    const m1 = t.match(/^([-\d.]+)(rem|px|em|%|vw|vh)\s*\*\s*([-\d.]+)$/)
+    if (m1) {
+      const v = Math.round(parseFloat(m1[1]!) * parseFloat(m1[3]!) * 100000) / 100000
+      return `${v}${m1[2]}`
+    }
+    // NUMBER * NUMBER_WITH_UNIT
+    const m2 = t.match(/^([-\d.]+)\s*\*\s*([-\d.]+)(rem|px|em|%|vw|vh)$/)
+    if (m2) {
+      const v = Math.round(parseFloat(m2[1]!) * parseFloat(m2[3]!) * 100000) / 100000
+      return `${v}${m2[3]}`
+    }
+    // NUMBER_WITH_UNIT / NUMBER
+    const m3 = t.match(/^([-\d.]+)(rem|px|em|%|vw|vh)\s*\/\s*([-\d.]+)$/)
+    if (m3) {
+      const v = Math.round(parseFloat(m3[1]!) / parseFloat(m3[3]!) * 100000) / 100000
+      return `${v}${m3[2]}`
+    }
+    return `calc(${expr})`
+  }
+  for (const [prop, value] of Object.entries(styles)) {
+    // 处理每个 calc(…) 子式，不处理嵌套 calc
+    result[prop] = value.replace(/calc\(([^()]+)\)/g, (_full, inner) => simplify(inner))
+  }
+  return result
 }
 
 /**

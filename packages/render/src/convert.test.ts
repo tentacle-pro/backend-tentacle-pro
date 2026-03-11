@@ -96,6 +96,27 @@ describe('packages/render — convertMarkdownToHTML', () => {
     expect(result.html).toContain('https://openai.com')
   })
 
+  test('TOC 标记可生成目录链接', async () => {
+    const md = '# 标题\n\n@[toc]\n\n## 第一节\n\n内容\n\n## 第二节\n\n内容'
+    const result = await convertMarkdownToHTML(md, testConfig)
+    expect(result.html).toContain('href="#第一节"')
+    expect(result.html).toContain('href="#第二节"')
+  })
+
+  test('Alert 语法可转换为引用块', async () => {
+    const md = ':::tip\n这是一条提示\n:::'
+    const result = await convertMarkdownToHTML(md, testConfig)
+    expect(result.html).toContain('<blockquote')
+    expect(result.html).toContain('提示：这是一条提示')
+  })
+
+  test('Ruby 语法可转换为 ruby 标签', async () => {
+    const md = '你好 [世界]{shi jie}'
+    const result = await convertMarkdownToHTML(md, testConfig)
+    expect(result.html).toContain('<ruby')
+    expect(result.html).toContain('<rt')
+  })
+
   test('返回结构包含 html 和 warnings 字段', async () => {
     const result = await convertMarkdownToHTML('hello', testConfig)
     expect(typeof result.html).toBe('string')

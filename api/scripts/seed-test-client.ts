@@ -76,7 +76,7 @@ async function main() {
   console.log(`curl -X POST http://localhost:3001/markdown2html \\`)
   console.log(`  -H "Content-Type: application/json" \\`)
   console.log(`  -H "Authorization: Bearer ${TEST_API_KEY}" \\`)
-  console.log(`  -d '{"markdown":"# Hello\\n\\nWorld","templateId":"default-simple"}'`)
+  console.log(`  -d '{"markdown":"# Hello\\n\\nWorld","templateId":"preset-classic"}'`)
 
   process.exit(0)
 }

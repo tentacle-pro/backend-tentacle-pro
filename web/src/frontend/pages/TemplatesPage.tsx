@@ -4,6 +4,9 @@ interface Template {
   id: string
   name: string
   isDefault: boolean
+  presetKey?: string | null
+  isBuiltinPreset?: boolean
+  canEditConfig?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -86,7 +89,11 @@ export function TemplatesPage() {
                 <td className="px-4 py-3 font-mono text-xs text-gray-500">{t.id}</td>
                 <td className="px-4 py-3 text-gray-800">{t.name}</td>
                 <td className="px-4 py-3">
-                  {t.isDefault ? (
+                  {t.isBuiltinPreset ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
+                      预置
+                    </span>
+                  ) : t.isDefault ? (
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
                       默认
                     </span>
@@ -98,7 +105,7 @@ export function TemplatesPage() {
                   {new Date(t.updatedAt).toLocaleString('zh-CN')}
                 </td>
                 <td className="px-4 py-3">
-                  {!t.isDefault && (
+                  {(t.canEditConfig ?? true) && (
                     <button
                       onClick={() => handleDelete(t.id, t.name)}
                       className="text-red-600 hover:text-red-700 text-xs"

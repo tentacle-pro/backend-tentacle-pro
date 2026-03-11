@@ -31,9 +31,11 @@ export const rehypeInjectStyles: Plugin<[TemplateConfig]> = (config) => {
     const styleCache: StyleCache = {}
     const allWarnings: string[] = []
     const globalDefaults = buildGlobalStyleDefaults(config.global)
+    // global.themeColor is the single authoritative "theme color" knob exposed in the editor UI.
+    // It must always override variables.brandColor — even if the preset defines a default brandColor.
     const effectiveVariables = {
       ...config.variables,
-      ...(config.global?.themeColor && !config.variables?.brandColor
+      ...(config.global?.themeColor
         ? { brandColor: config.global.themeColor }
         : {}),
     }
@@ -108,12 +110,15 @@ function buildGlobalStyleDefaults(global?: GlobalConfig): StyleCache {
   if (!global) return {}
 
   const defaults: StyleCache = {}
-  const textTags = ['p', 'li', 'blockquote', 'td', 'th']
+  // 注意：li 不在 textTags 里 —— 有 style 属性的 <li> 会导致微信编辑器插入 spacer 占位 <li>
+  // li 的 font-family/font-size 通过继承 ul/ol 获得
+  const textTags = ['p', 'blockquote', 'td', 'th']
+  const listContainerTags = ['ul', 'ol']
   const titleTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
   const codeTags = ['code', 'pre']
 
   if (global.fontFamily) {
-    for (const tag of [...textTags, ...titleTags, ...codeTags]) {
+    for (const tag of [...textTags, ...listContainerTags, ...titleTags, ...codeTags]) {
       defaults[tag] = { ...(defaults[tag] || {}), 'font-family': global.fontFamily }
     }
   }
@@ -124,7 +129,7 @@ function buildGlobalStyleDefaults(global?: GlobalConfig): StyleCache {
       base: '16px',
       lg: '18px',
     }
-    for (const tag of textTags) {
+    for (const tag of [...textTags, ...listContainerTags]) {
       defaults[tag] = {
         ...(defaults[tag] || {}),
         'font-size': sizeMap[global.baseFontSize],

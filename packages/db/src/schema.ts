@@ -108,7 +108,7 @@ export const publishAuditLogs = pgTable(
 // 排版模板（平台统一管理，管理员维护）
 
 export const templates = pgTable('templates', {
-  id: text('id').primaryKey(), // e.g. "default-simple"
+  id: text('id').primaryKey(), // e.g. "preset-classic"
   name: text('name').notNull(),
   config: jsonb('config').notNull(), // TemplateConfig as JSONB
   isDefault: boolean('is_default').notNull().default(false),

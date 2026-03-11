@@ -22,6 +22,14 @@ adminConvertApp.post(
           variables: z.record(z.string()).optional(),
           styles: z.record(z.string()).optional(),
           assets: z.record(z.string()).optional(),
+          meta: z
+            .object({
+              presetKey: z.string().optional(),
+              presetName: z.string().optional(),
+              description: z.string().optional(),
+              locked: z.boolean().optional(),
+            })
+            .optional(),
         })
         .optional(),
     }),
@@ -42,6 +50,12 @@ adminConvertApp.post(
       variables?: Record<string, string>
       styles?: Record<string, string>
       assets?: Record<string, string>
+      meta?: {
+        presetKey?: string
+        presetName?: string
+        description?: string
+        locked?: boolean
+      }
     }
 
     const mergedConfig = templateConfig
@@ -50,12 +64,14 @@ adminConvertApp.post(
           variables: { ...(baseConfig.variables ?? {}), ...(templateConfig.variables ?? {}) },
           styles: { ...(baseConfig.styles ?? {}), ...(templateConfig.styles ?? {}) },
           assets: { ...dbAliasMap, ...(baseConfig.assets ?? {}), ...(templateConfig.assets ?? {}) },
+          meta: { ...(baseConfig.meta ?? {}), ...(templateConfig.meta ?? {}) },
         }
       : {
           global: baseConfig.global ?? {},
           variables: baseConfig.variables ?? {},
           styles: baseConfig.styles ?? {},
           assets: { ...dbAliasMap, ...(baseConfig.assets ?? {}) },
+          meta: baseConfig.meta ?? {},
         }
 
     const result = await convertMarkdownToHTML(markdown, mergedConfig)
