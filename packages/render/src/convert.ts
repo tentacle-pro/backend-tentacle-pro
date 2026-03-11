@@ -102,39 +102,66 @@ function rehypeFrontmatterMeta(templateConfig: TemplateConfig): Plugin {
       const nodesToInsert: any[] = []
 
       if (hasSummary) {
-        // 有摘要：渲染完整边框的摘要卡片，meta 信息作为卡片顶部小字（如有）
-        const cardChildren: any[] = []
-
-        if (hasMeta) {
-          cardChildren.push({
-            type: 'element', tagName: 'p',
-            properties: {
-              style: [
-                'margin: 0 0 10px',
-                'padding-bottom: 10px',
-                `border-bottom: 1px solid ${hexToRgba(brandColor, 0.2)}`,
-                'font-size: 12px',
-                'color: #999',
-                'font-family: system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
-              ].join('; '),
+        // 摘要卡片：
+        // ┌─ 标题行：[▎ 本文摘要 ▎]  左右各一条主题色竖线镜像装饰
+        // ├─ 分割线
+        // └─ 摘要正文
+        const labelBar = {
+          type: 'element', tagName: 'p',
+          properties: {
+            style: [
+              'margin: 0 0 12px',
+              'padding-bottom: 12px',
+              `border-bottom: 1px solid ${hexToRgba(brandColor, 0.2)}`,
+              'display: flex',
+              'align-items: center',
+              'gap: 8px',
+              'font-size: 13px',
+              'font-weight: bold',
+              `color: ${brandColor}`,
+              'letter-spacing: 0.08em',
+              'font-family: system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
+            ].join('; '),
+          },
+          children: [
+            // 左竖线装饰
+            {
+              type: 'element', tagName: 'span',
+              properties: {
+                style: `display: inline-block; width: 3px; height: 14px; background: ${brandColor}; border-radius: 2px; vertical-align: middle; margin-right: 6px`,
+              },
+              children: [],
             },
-            children: metaParts,
-          })
+            { type: 'text', value: '本文摘要' },
+            // 右侧镜像竖线（通过 flex 推到右边）
+            {
+              type: 'element', tagName: 'span',
+              properties: { style: 'flex: 1' },
+              children: [],
+            },
+            {
+              type: 'element', tagName: 'span',
+              properties: {
+                style: `display: inline-block; width: 3px; height: 14px; background: ${brandColor}; border-radius: 2px; vertical-align: middle; margin-left: 6px; opacity: 0.35`,
+              },
+              children: [],
+            },
+          ],
         }
 
-        cardChildren.push({
+        const summaryText = {
           type: 'element', tagName: 'p',
           properties: {
             style: [
               'margin: 0',
               'font-size: 14px',
               'color: #555',
-              'line-height: 1.9',
+              'line-height: 2',
               'font-family: system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
             ].join('; '),
           },
           children: [{ type: 'text', value: matter.summary }],
-        })
+        }
 
         nodesToInsert.push({
           type: 'element', tagName: 'section',
@@ -142,13 +169,15 @@ function rehypeFrontmatterMeta(templateConfig: TemplateConfig): Plugin {
             style: [
               'margin: 8px 0 28px',
               'padding: 16px 18px',
-              `border: 1px solid ${hexToRgba(brandColor, 0.35)}`,
-              `border-left: 4px solid ${brandColor}`,
-              'border-radius: 6px',
-              `background-color: ${hexToRgba(brandColor, 0.04)}`,
+              `border-top: 2px solid ${brandColor}`,
+              `border-bottom: 2px solid ${brandColor}`,
+              `border-left: 1px solid ${hexToRgba(brandColor, 0.25)}`,
+              `border-right: 1px solid ${hexToRgba(brandColor, 0.25)}`,
+              'border-radius: 4px',
+              `background-color: ${hexToRgba(brandColor, 0.03)}`,
             ].join('; '),
           },
-          children: cardChildren,
+          children: [labelBar, summaryText],
         })
       } else {
         // 无摘要：退回细线 meta 行
