@@ -77,7 +77,7 @@ export async function convertTailwindToInline(
       resolvedStyles[prop] = resolveCssValue(value, allVars)
     }
 
-    const { filtered, warnings } = filterUnsupportedStyles(resolvedStyles)
+    const { filtered, warnings } = filterUnsupportedStyles(expandLogicalProperties(resolvedStyles))
 
     const unresolved = classList.filter((cls) => !matchedClasses.has(cls))
     if (unresolved.length > 0) {
@@ -223,6 +223,38 @@ function filterUnsupportedStyles(
   }
 
   return { filtered, warnings }
+}
+
+/**
+ * 将 CSS 逻辑属性展开为对应物理属性，微信 WebView 不支持逻辑属性，
+ * 且会对 margin-block 等生成空列表项等渲染 bug。
+ */
+function expandLogicalProperties(styles: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [prop, value] of Object.entries(styles)) {
+    switch (prop) {
+      case 'margin-block':        result['margin-top'] = value;    result['margin-bottom'] = value;  break
+      case 'margin-block-start': result['margin-top'] = value;                                     break
+      case 'margin-block-end':   result['margin-bottom'] = value;                                  break
+      case 'margin-inline':      result['margin-left'] = value;   result['margin-right'] = value;   break
+      case 'margin-inline-start':result['margin-left'] = value;                                    break
+      case 'margin-inline-end':  result['margin-right'] = value;                                   break
+      case 'padding-block':        result['padding-top'] = value;  result['padding-bottom'] = value; break
+      case 'padding-block-start':  result['padding-top'] = value;                                   break
+      case 'padding-block-end':    result['padding-bottom'] = value;                                break
+      case 'padding-inline':       result['padding-left'] = value; result['padding-right'] = value;  break
+      case 'padding-inline-start': result['padding-left'] = value;                                  break
+      case 'padding-inline-end':   result['padding-right'] = value;                                 break
+      case 'inset-block':        result['top'] = value;           result['bottom'] = value;         break
+      case 'inset-block-start':  result['top'] = value;                                            break
+      case 'inset-block-end':    result['bottom'] = value;                                         break
+      case 'inset-inline':       result['left'] = value;          result['right'] = value;          break
+      case 'inset-inline-start': result['left'] = value;                                           break
+      case 'inset-inline-end':   result['right'] = value;                                          break
+      default: result[prop] = value
+    }
+  }
+  return result
 }
 
 /** 从生成的 CSS 中收集 :root / :host 的 CSS 自定义属性定义 */

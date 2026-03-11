@@ -89,7 +89,7 @@ function rehypeFrontmatterMeta(templateConfig: TemplateConfig): Plugin {
         type: 'element',
         tagName: 'p',
         properties: {
-          style: 'font-size: 13px; color: #888; text-align: center; margin: -8px 0 20px; line-height: 2; font-family: system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
+          style: 'font-size: 13px; color: #999; text-align: center; margin-top: 4px; margin-bottom: 24px; padding-top: 8px; padding-bottom: 8px; line-height: 1.8; border-top: 1px solid #eee; border-bottom: 1px solid #eee; font-family: system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
         },
         children: parts,
       }
