@@ -27,6 +27,15 @@ const WECHAT_UNSUPPORTED_PROPERTIES = [
   'transition-delay',
 ]
 
+// Tailwind v4 内部状态变量默认值（source(none) 跳过 @layer base，需手动补充）
+const TW_INTERNAL_DEFAULTS: Record<string, string> = {
+  '--tw-border-style': 'solid',
+  '--tw-inset-shadow': '0 0 #0000',
+  '--tw-inset-ring-shadow': '0 0 #0000',
+  '--tw-ring-offset-shadow': '0 0 #0000',
+  '--tw-ring-shadow': '0 0 #0000',
+}
+
 export interface TailwindConversionResult {
   styles: Record<string, string>
   warnings: string[]
@@ -52,7 +61,23 @@ export async function convertTailwindToInline(
     const css = await generateCSS(cleanedClasses)
     const classList = cleanedClasses.split(/\s+/).filter(Boolean)
     const { styles, matchedClasses } = extractInlineStyles(css, classList)
-    const { filtered, warnings } = filterUnsupportedStyles(styles)
+
+    // 收集主题变量 + 提取样式中的 --* 局部变量，构建完整解析上下文
+    const themeVars = collectCssVars(css)
+    const localVars: Record<string, string> = {}
+    for (const [prop, value] of Object.entries(styles)) {
+      if (prop.startsWith('--')) localVars[prop] = value
+    }
+    const allVars = { ...TW_INTERNAL_DEFAULTS, ...themeVars, ...localVars }
+
+    // 解析所有 var() 引用为具体值，过滤掉自定义属性声明（微信不需要）
+    const resolvedStyles: Record<string, string> = {}
+    for (const [prop, value] of Object.entries(styles)) {
+      if (prop.startsWith('--')) continue
+      resolvedStyles[prop] = resolveCssValue(value, allVars)
+    }
+
+    const { filtered, warnings } = filterUnsupportedStyles(resolvedStyles)
 
     const unresolved = classList.filter((cls) => !matchedClasses.has(cls))
     if (unresolved.length > 0) {
@@ -198,4 +223,68 @@ function filterUnsupportedStyles(
   }
 
   return { filtered, warnings }
+}
+
+/** 从生成的 CSS 中收集 :root / :host 的 CSS 自定义属性定义 */
+function collectCssVars(css: string): Record<string, string> {
+  const vars: Record<string, string> = {}
+  try {
+    const root = postcss.parse(css)
+    root.walkRules((rule) => {
+      const sel = rule.selector?.trim().replace(/\s+/g, ' ')
+      if (
+        sel === ':root' || sel === ':host' ||
+        sel === ':root, :host' || sel === ':host, :root'
+      ) {
+        rule.walkDecls((decl) => {
+          if (decl.prop.startsWith('--')) vars[decl.prop] = decl.value
+        })
+      }
+    })
+  } catch {}
+  return vars
+}
+
+/**
+ * 递归将 var(--x, fallback) 解析为具体值。
+ * 使用状态机正确处理嵌套括号。
+ */
+function resolveCssValue(value: string, vars: Record<string, string>, depth = 0): string {
+  if (depth > 20 || !value.includes('var(')) return value
+  let result = ''
+  let i = 0
+  while (i < value.length) {
+    if (value.startsWith('var(', i)) {
+      let parenDepth = 1
+      let j = i + 4
+      while (j < value.length && parenDepth > 0) {
+        if (value[j] === '(') parenDepth++
+        else if (value[j] === ')') parenDepth--
+        j++
+      }
+      const inner = value.slice(i + 4, j - 1)
+      // 找第一个不在嵌套括号内的逗号
+      let commaIdx = -1
+      let pd = 0
+      for (let k = 0; k < inner.length; k++) {
+        if (inner[k] === '(') pd++
+        else if (inner[k] === ')') pd--
+        else if (inner[k] === ',' && pd === 0) { commaIdx = k; break }
+      }
+      const varName = commaIdx === -1 ? inner.trim() : inner.slice(0, commaIdx).trim()
+      const fallback = commaIdx === -1 ? undefined : inner.slice(commaIdx + 1).trim()
+      if (vars[varName] !== undefined) {
+        result += resolveCssValue(vars[varName]!, vars, depth + 1)
+      } else if (fallback !== undefined) {
+        result += resolveCssValue(fallback, vars, depth + 1)
+      } else {
+        result += value.slice(i, j)
+      }
+      i = j
+    } else {
+      result += value[i]
+      i++
+    }
+  }
+  return result
 }

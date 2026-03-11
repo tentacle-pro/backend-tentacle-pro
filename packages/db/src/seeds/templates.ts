@@ -4,14 +4,13 @@
  */
 import { getDb } from '../client'
 import { templates } from '../schema'
-import { eq } from 'drizzle-orm'
 
 const overseasDividerClass = `bg-[url(@bg(divider))]`
 
 const defaultConfig = {
   global: {
     themeColor: '#2563eb',
-    fontFamily: 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif',
+    fontFamily: 'system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
     baseFontSize: 'base',
     codeTheme: 'androidstudio',
   },
@@ -51,7 +50,7 @@ const defaultConfig = {
 const overseasUnicornConfig = {
   global: {
     themeColor: '#b76e79',
-    fontFamily: 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif',
+    fontFamily: 'system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
     baseFontSize: 'base',
     codeTheme: 'androidstudio',
   },
@@ -107,22 +106,20 @@ async function seed() {
   const db = getDb()
 
   for (const tpl of SEED_TEMPLATES) {
-    const existing = await db.query.templates.findFirst({
-      where: eq(templates.id, tpl.id),
-    })
-
-    if (existing) {
-      console.log(`[skip] 模板已存在：${tpl.id}`)
-      continue
-    }
-
     await db.insert(templates).values({
       id: tpl.id,
       name: tpl.name,
       config: tpl.config,
       isDefault: tpl.isDefault,
+    }).onConflictDoUpdate({
+      target: templates.id,
+      set: {
+        name: tpl.name,
+        config: tpl.config,
+        isDefault: tpl.isDefault,
+      },
     })
-    console.log(`[ok]   已插入模板：${tpl.id}`)
+    console.log(`[upsert] 模板已同步：${tpl.id}`)
   }
 
   console.log('✅ 模板种子数据完成')
