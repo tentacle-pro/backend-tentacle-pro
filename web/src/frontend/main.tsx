@@ -8,6 +8,7 @@ import { EditorPage } from './pages/EditorPage'
 import { TemplatesPage } from './pages/TemplatesPage'
 import { AssetsPage } from './pages/AssetsPage'
 import { ClientsPage } from './pages/ClientsPage'
+import { ClientDetailPage } from './pages/ClientDetailPage'
 import { DashboardShell } from './components/DashboardShell'
 import { AuthGuard } from './components/AuthGuard'
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="templates" element={<TemplatesPage />} />
           <Route path="assets" element={<AssetsPage />} />
           <Route path="clients" element={<ClientsPage />} />
+          <Route path="clients/:clientId" element={<ClientDetailPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

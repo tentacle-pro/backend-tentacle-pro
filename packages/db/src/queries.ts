@@ -1,6 +1,6 @@
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, asc, and } from 'drizzle-orm'
 import { getDb } from './client'
-import { apiClients, clientAccountBindings, wechatAccounts, templates, renderAssets } from './schema'
+import { apiClients, clientAccountBindings, wechatAccounts, templates, renderAssets, clientInjections } from './schema'
 
 export { eq } from 'drizzle-orm'
 
@@ -207,4 +207,82 @@ export async function updateApiClientKeyHash(input: { id: string; apiKeyHash: st
       updatedAt: new Date(),
     })
     .where(eq(apiClients.id, input.id))
+}
+
+// ─── Client Injections ────────────────────────────────────────────────────────
+
+/** 查询某客户端所有已启用的注入片段（渲染时使用），按 position + sortOrder 排序 */
+export async function findClientInjections(clientId: string) {
+  const db = getDb()
+  return db
+    .select()
+    .from(clientInjections)
+    .where(
+      and(
+        eq(clientInjections.clientId, clientId),
+        eq(clientInjections.enabled, true)
+      )
+    )
+    .orderBy(asc(clientInjections.position), asc(clientInjections.sortOrder))
+}
+
+/** 列出某客户端所有注入片段（含禁用），管理后台使用 */
+export async function listClientInjections(clientId: string) {
+  const db = getDb()
+  return db
+    .select()
+    .from(clientInjections)
+    .where(eq(clientInjections.clientId, clientId))
+    .orderBy(asc(clientInjections.position), asc(clientInjections.sortOrder))
+}
+
+/** 通过 ID 查找单条注入片段 */
+export async function findClientInjectionById(id: string) {
+  const db = getDb()
+  return db.query.clientInjections.findFirst({
+    where: eq(clientInjections.id, id),
+  })
+}
+
+/** 创建注入片段 */
+export async function createClientInjection(input: {
+  id: string
+  clientId: string
+  position: string
+  html: string
+  sortOrder?: number
+  enabled?: boolean
+}) {
+  const db = getDb()
+  await db.insert(clientInjections).values({
+    id: input.id,
+    clientId: input.clientId,
+    position: input.position,
+    html: input.html,
+    sortOrder: input.sortOrder ?? 0,
+    enabled: input.enabled ?? true,
+  })
+}
+
+/** 更新注入片段（部分更新） */
+export async function updateClientInjection(
+  id: string,
+  updates: {
+    position?: string
+    html?: string
+    sortOrder?: number
+    enabled?: boolean
+  }
+) {
+  const db = getDb()
+  await db
+    .update(clientInjections)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(clientInjections.id, id))
+}
+
+/** 删除注入片段 */
+export async function deleteClientInjection(id: string) {
+  const db = getDb()
+  await db.delete(clientInjections).where(eq(clientInjections.id, id))
 }

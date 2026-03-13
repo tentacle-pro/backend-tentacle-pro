@@ -11,6 +11,11 @@ import {
   listClientsWithBindings,
   updateApiClientKeyHash,
   updateApiClientStatus,
+  listClientInjections,
+  findClientInjectionById,
+  createClientInjection,
+  updateClientInjection,
+  deleteClientInjection,
 } from '@tentacle-pro/db'
 import { encrypt, sha256Hex } from '@tentacle-pro/core'
 import { requireAdmin } from '../auth'
@@ -219,5 +224,110 @@ adminClientsApp.post(
         api_key: apiKey,
       },
     })
+  }
+)
+
+// ─── Injections CRUD ──────────────────────────────────────────────────────────
+
+const injectionParamSchema = z.object({
+  clientId: z.string().min(3).max(64),
+  injectionId: z.string().min(1),
+})
+
+const createInjectionSchema = z.object({
+  position: z.enum(['header', 'after_abstract', 'footer']),
+  html: z.string().min(1).max(50000),
+  sort_order: z.number().int().optional(),
+  enabled: z.boolean().optional(),
+})
+
+const updateInjectionSchema = z.object({
+  position: z.enum(['header', 'after_abstract', 'footer']).optional(),
+  html: z.string().min(1).max(50000).optional(),
+  sort_order: z.number().int().optional(),
+  enabled: z.boolean().optional(),
+})
+
+/** GET /admin/clients/:clientId/injections — 列出客户所有注入片段（含禁用） */
+adminClientsApp.get(
+  '/:clientId/injections',
+  zValidator('param', clientIdParamSchema),
+  async (c) => {
+    const { clientId } = c.req.valid('param')
+    const client = await findClientById(clientId)
+    if (!client) return c.json({ ok: false, error: { message: 'Client not found' } }, 404)
+
+    const rows = await listClientInjections(clientId)
+    return c.json({ ok: true, data: rows })
+  }
+)
+
+/** POST /admin/clients/:clientId/injections — 新增注入片段 */
+adminClientsApp.post(
+  '/:clientId/injections',
+  zValidator('param', clientIdParamSchema),
+  zValidator('json', createInjectionSchema),
+  async (c) => {
+    const { clientId } = c.req.valid('param')
+    const body = c.req.valid('json')
+
+    const client = await findClientById(clientId)
+    if (!client) return c.json({ ok: false, error: { message: 'Client not found' } }, 404)
+
+    const id = genId()
+    await createClientInjection({
+      id,
+      clientId,
+      position: body.position,
+      html: body.html,
+      sortOrder: body.sort_order,
+      enabled: body.enabled,
+    })
+
+    const created = await findClientInjectionById(id)
+    return c.json({ ok: true, data: created }, 201)
+  }
+)
+
+/** PATCH /admin/clients/:clientId/injections/:injectionId — 更新注入片段 */
+adminClientsApp.patch(
+  '/:clientId/injections/:injectionId',
+  zValidator('param', injectionParamSchema),
+  zValidator('json', updateInjectionSchema),
+  async (c) => {
+    const { clientId, injectionId } = c.req.valid('param')
+    const body = c.req.valid('json')
+
+    const injection = await findClientInjectionById(injectionId)
+    if (!injection || injection.clientId !== clientId) {
+      return c.json({ ok: false, error: { message: 'Injection not found' } }, 404)
+    }
+
+    await updateClientInjection(injectionId, {
+      position: body.position,
+      html: body.html,
+      sortOrder: body.sort_order,
+      enabled: body.enabled,
+    })
+
+    const updated = await findClientInjectionById(injectionId)
+    return c.json({ ok: true, data: updated })
+  }
+)
+
+/** DELETE /admin/clients/:clientId/injections/:injectionId — 删除注入片段 */
+adminClientsApp.delete(
+  '/:clientId/injections/:injectionId',
+  zValidator('param', injectionParamSchema),
+  async (c) => {
+    const { clientId, injectionId } = c.req.valid('param')
+
+    const injection = await findClientInjectionById(injectionId)
+    if (!injection || injection.clientId !== clientId) {
+      return c.json({ ok: false, error: { message: 'Injection not found' } }, 404)
+    }
+
+    await deleteClientInjection(injectionId)
+    return c.json({ ok: true, data: { id: injectionId } })
   }
 )

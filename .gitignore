@@ -10,4 +10,3 @@ __pycache__/
 node_modules/
 dist/
 .turbo/
-packages/db/migrations/

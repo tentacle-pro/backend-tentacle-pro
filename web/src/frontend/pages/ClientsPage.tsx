@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 interface ClientItem {
   client_id: string
@@ -26,6 +27,7 @@ const emptyForm: CreateClientForm = {
 }
 
 export function ClientsPage() {
+  const navigate = useNavigate()
   const [clients, setClients] = useState<ClientItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -346,6 +348,12 @@ export function ClientsPage() {
                         className="text-xs text-amber-600 hover:text-amber-700"
                       >
                         重新生成 API_KEY
+                      </button>
+                      <button
+                        onClick={() => navigate(`/dashboard/clients/${item.client_id}`)}
+                        className="text-xs text-violet-600 hover:text-violet-700"
+                      >
+                        配置注入
                       </button>
                     </td>
                   </tr>

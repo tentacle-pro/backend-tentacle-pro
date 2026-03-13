@@ -116,6 +116,30 @@ export const templates = pgTable('templates', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// ─── client_injections ───────────────────────────────────────────────────────
+// 企业固定注入内容：HTML 片段，在渲染成 HTML 后按位置插入
+
+export const clientInjections = pgTable(
+  'client_injections',
+  {
+    id: text('id').primaryKey(),
+    clientId: text('client_id')
+      .notNull()
+      .references(() => apiClients.id),
+    // 插入位置：header（正文前）| after_abstract（首段后）| footer（正文后）
+    position: text('position').notNull(),
+    html: text('html').notNull(),
+    enabled: boolean('enabled').notNull().default(true),
+    // 同一 position 下多条记录的显示顺序（升序）
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('client_injections_client_position_idx').on(t.clientId, t.position),
+  ]
+)
+
 // ─── render_assets ───────────────────────────────────────────────────────────
 // 渲染素材（本地磁盘，URL 为相对路径，后续可迁移 CDN）
 
