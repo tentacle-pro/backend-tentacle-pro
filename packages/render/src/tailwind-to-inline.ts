@@ -52,6 +52,8 @@ const TW_INTERNAL_DEFAULTS: Record<string, string> = {
   '--color-white': '#fff',
   '--color-black': '#000',
   '--color-transparent': 'transparent',
+  // Tailwind v4 基础间距变量（1 spacing unit = 0.25rem = 4px）
+  '--spacing': '0.25rem',
   // Tailwind v4 圆角主题变量
   '--radius-xs': '0.125rem',
   '--radius-sm': '0.1875rem',
