@@ -293,6 +293,9 @@ const SEED_TEMPLATES = [
 async function seed() {
   const db = getDb()
 
+  await db.delete(templates)
+  console.log('[reset] 已清空模板表')
+
   for (const tpl of SEED_TEMPLATES) {
     await db
       .insert(templates)
