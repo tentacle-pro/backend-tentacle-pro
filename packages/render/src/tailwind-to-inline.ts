@@ -34,10 +34,34 @@ const TW_INTERNAL_DEFAULTS: Record<string, string> = {
   '--tw-inset-ring-shadow': '0 0 #0000',
   '--tw-ring-offset-shadow': '0 0 #0000',
   '--tw-ring-shadow': '0 0 #0000',
-  // 渐变位置默认值（Tailwind v4 内联样式场景无法从 localVars 中收到时的兜底）
+  // 渐变位置默认值
   '--tw-gradient-from-position': '0%',
   '--tw-gradient-via-position': '50%',
   '--tw-gradient-to-position': '100%',
+  // Tailwind v4 字重主题变量（source(none) 不生成 :root 定义，需在此兜底）
+  '--font-weight-thin': '100',
+  '--font-weight-extralight': '200',
+  '--font-weight-light': '300',
+  '--font-weight-normal': '400',
+  '--font-weight-medium': '500',
+  '--font-weight-semibold': '600',
+  '--font-weight-bold': '700',
+  '--font-weight-extrabold': '800',
+  '--font-weight-black': '900',
+  // Tailwind v4 颜色主题变量
+  '--color-white': '#fff',
+  '--color-black': '#000',
+  '--color-transparent': 'transparent',
+  // Tailwind v4 圆角主题变量
+  '--radius-xs': '0.125rem',
+  '--radius-sm': '0.1875rem',
+  '--radius-md': '0.375rem',
+  '--radius-lg': '0.5rem',
+  '--radius-xl': '0.75rem',
+  '--radius-2xl': '1rem',
+  '--radius-3xl': '1.5rem',
+  '--radius-4xl': '2rem',
+  '--radius-full': '9999px',
 }
 
 export interface TailwindConversionResult {
@@ -82,7 +106,7 @@ export async function convertTailwindToInline(
     }
 
     const { filtered, warnings } = filterUnsupportedStyles(
-      remToPx(simplifyCalcValues(expandLogicalProperties(resolvedStyles)))
+      remToPx(simplifyCalcValues(expandLogicalProperties(stripColorInterpolation(resolvedStyles))))
     )
 
     const unresolved = classList.filter((cls) => !matchedClasses.has(cls))
@@ -229,6 +253,27 @@ function filterUnsupportedStyles(
   }
 
   return { filtered, warnings }
+}
+
+/**
+ * 移除 background-image 渐变中的 CSS Color Level 4 色彩插值提示（oklab/oklch/srgb 等）
+ * 微信 WebView 不支持 "in oklab" 语法，需降级为标准线性渐变
+ * e.g. linear-gradient(to right in oklab, ...) → linear-gradient(to right, ...)
+ */
+function stripColorInterpolation(styles: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [prop, value] of Object.entries(styles)) {
+    if (prop === 'background-image' || prop === 'background') {
+      // 移除渐变方向后的 "in <color-space>" 部分
+      result[prop] = value.replace(
+        /(linear-gradient\([^)]*?)\s+in\s+(oklab|oklch|srgb|srgb-linear|display-p3|a98-rgb|prophoto-rgb|rec2020|hsl|hwb|lch|lab)(\s*,)/gi,
+        '$1$3'
+      )
+    } else {
+      result[prop] = value
+    }
+  }
+  return result
 }
 
 /**

@@ -51,7 +51,7 @@ bun run db:generate
 docker exec -it postgresql-vector-age-pgmq psql -U postgres
 >CREATE DATABASE tentacle_pro_db;
 bun run db:migrate
-bun --env-file ../../.env run db:seed:templates
+bun --env-file=../../.env src/seeds/templates.ts
 ```
 
 ### 4. 启动服务
