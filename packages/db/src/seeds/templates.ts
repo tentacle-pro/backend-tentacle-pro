@@ -257,6 +257,63 @@ const warmPresetConfig = {
   },
 }
 
+const elegantGreenPresetConfig = {
+  global: {
+    themeColor: '#2BAE85',
+    fontFamily: 'system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
+    baseFontSize: 'base',
+    codeTheme: 'androidstudio',
+  },
+  variables: {
+    brandColor: '#2BAE85',
+    accentColor: '#F4FBF9',
+    textColor: '#2c2c2c',
+  },
+  styles: {
+    // H1: 左粗实线（5px）+ 底细实线，品牌翡翠绿
+    h1: 'pl-2 pb-1 text-[26px] font-bold text-[var(--brandColor)] mt-0 mb-7 leading-[1.4] tracking-[0.5px] border-l-[5px] [border-left-style:solid] border-l-[var(--brandColor)] border-b [border-bottom-style:solid] border-b-[var(--brandColor)]',
+    // H2: 左双实线（4px double），品牌绿
+    h2: 'pl-[10px] text-[22px] font-semibold text-[var(--brandColor)] mt-9 mb-6 leading-[1.4] border-l-4 [border-left-style:double] border-l-[var(--brandColor)]',
+    // H3: 左细实线（3px），品牌绿
+    h3: 'pl-[10px] text-[19px] font-semibold text-[var(--brandColor)] mt-7 mb-5 leading-[1.4] border-l-[3px] [border-left-style:solid] border-l-[var(--brandColor)]',
+    h4: 'pl-2 text-[17px] font-semibold text-[var(--brandColor)] mt-6 mb-2',
+    h5: 'text-[16px] font-semibold text-[var(--brandColor)] mt-5 mb-2',
+    h6: 'text-[15px] font-medium text-[var(--brandColor)] mt-4 mb-2',
+    p: 'mt-0 mb-5 leading-[1.75] text-[16px] text-[#2c2c2c]',
+    // 右圆角，淡绿渐变背景（rgba预计算hex），左实线
+    // rgba(43,174,133,0.05)→#F4FBF9，rgba(43,174,133,0.02)→#FBFDFD
+    blockquote: 'my-1 pt-4 pb-1 px-2 text-[15px] text-[#555555] bg-gradient-to-br from-[#F4FBF9] to-[#FBFDFD] border-l-[3px] [border-left-style:solid] border-l-[var(--brandColor)] rounded-[0_8px_8px_0] leading-[1.8]',
+    // 行内代码：品牌绿文字 + 淡绿背景
+    code: 'font-mono text-[90%] text-[var(--brandColor)] bg-[#F4FBF9] px-1.5 py-0.5 rounded',
+    'code-inline': 'font-mono text-[90%] text-[var(--brandColor)] bg-[#F4FBF9] px-1.5 py-0.5 rounded',
+    // 代码块：深色背景（#282c34），轻阴影
+    pre: 'mt-5 mb-5 p-5 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.15)] bg-[#282c34] overflow-x-auto text-gray-100',
+    ul: 'mt-2 mb-5 list-none p-0 leading-[1.75] text-[16px] text-[#2c2c2c]',
+    ol: 'mt-2 mb-5 list-none p-0 leading-[1.75] text-[16px] text-[#2c2c2c]',
+    li: 'my-2 leading-[1.8]',
+    strong: 'font-semibold text-[var(--brandColor)]',
+    em: 'italic text-[#444444]',
+    del: 'line-through text-gray-500',
+    // 居中渐变分割线，宽50%，翡翠绿淡入淡出（rgba(43,174,133,0.3)→#BFE7DA）
+    hr: 'my-10 border-0 h-px w-1/2 mx-auto bg-gradient-to-r from-transparent via-[#BFE7DA] to-transparent',
+    a: 'text-[#576b95] no-underline',
+    img: 'max-w-full h-auto my-4 rounded-lg shadow-md',
+    table: 'w-full my-9 border-collapse text-[15px] shadow-sm',
+    // 渐变表头（rgba预计算hex）：rgba(43,174,133,0.15)→#DFF3ED，rgba(43,174,133,0.08)→#EEF9F5
+    thead: 'bg-gradient-to-b from-[#DFF3ED] to-[#EEF9F5]',
+    // 顶部3px品牌色实线 + 全边框（rgba(43,174,133,0.2)→#D5EFE7）
+    th: 'px-7 py-5 text-left font-semibold text-[12px] tracking-[1.2px] uppercase text-[var(--brandColor)] border border-[#D5EFE7] border-t-[3px] [border-top-style:solid] border-t-[var(--brandColor)]',
+    // 单元格边框：rgba(43,174,133,0.12)→#E6F5F0
+    td: 'px-7 py-5 text-[15px] leading-[1.75] bg-white text-[#3a3a3a] border border-[#E6F5F0]',
+  },
+  meta: {
+    presetKey: 'elegant-green',
+    presetName: '精致·翡翠绿',
+    description: '层次丰富，左边框递减 + 渐变背景，适合品牌内容与知识型文章。',
+    locked: true,
+  },
+}
+
 const SEED_TEMPLATES = [
   {
     id: 'preset-classic',
@@ -286,6 +343,12 @@ const SEED_TEMPLATES = [
     id: 'preset-warm',
     name: '预置 · 温暖',
     config: warmPresetConfig,
+    isDefault: false,
+  },
+  {
+    id: 'preset-elegant-green',
+    name: '预置 · 精致翡翠绿',
+    config: elegantGreenPresetConfig,
     isDefault: false,
   },
 ]
