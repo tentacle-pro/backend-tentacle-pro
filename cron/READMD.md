@@ -18,7 +18,7 @@ npm install defuddle
 实际测试 https://quaily.com/op7418/p/aigc-weekly-60bkn8x8 这个页面表现都不错
 
 ### cloudflare
-未调试通过
+未测试crawl
 
 ## 结论
 微信公众号文章的爬取，jina和defuddle都无法获取到内容，只有opencode内置的webfetch能。

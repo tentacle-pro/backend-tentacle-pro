@@ -54,9 +54,10 @@ function hexToRgba(hex: string, alpha: number): string {
 
 /** Rehype 插件工厂：将 frontmatter 元信息（日期、作者、原文链接）渲染为文章顶部信息栏 */
 function rehypeFrontmatterMeta(templateConfig: TemplateConfig): Plugin {
+  // global.themeColor 是权威主题色（与 rehype-inject-styles 保持一致：themeColor 总是覆盖 brandColor）
   const brandColor =
-    templateConfig.variables?.brandColor ||
     templateConfig.global?.themeColor ||
+    templateConfig.variables?.brandColor ||
     '#888888'
 
   return function () {

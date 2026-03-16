@@ -312,7 +312,19 @@ export const rehypeWechatEnhancements: Plugin<[], Root> = () => {
           ? `${existing}; display: block; margin: 0.2em 8px`
           : 'display: block; margin: 0.2em 8px'
         const marker = isOrdered ? `${counter}. ` : '• '
-        li.children.unshift({ type: 'text', value: marker } as Text)
+        const markerNode: Text = { type: 'text', value: marker }
+        // 宽松列表（loose list）中，li 内容被 remark 包在 <p> 里；
+        // li.children[0] 通常是空白文本节点 \n，需跳过找第一个元素子节点。
+        // 若把 marker 直接 unshift 到 li.children，文本节点在块级 <p> 之前会换行。
+        // 修复：若第一个元素子节点是 <p>，把 marker 插入 <p> 内部，保持行内流。
+        const firstElChild = li.children.find(
+          (c) => c.type === 'element'
+        ) as Element | undefined
+        if (firstElChild && firstElChild.tagName === 'p') {
+          firstElChild.children.unshift(markerNode)
+        } else {
+          li.children.unshift(markerNode)
+        }
       }
     })
   }

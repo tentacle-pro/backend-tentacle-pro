@@ -34,6 +34,10 @@ const TW_INTERNAL_DEFAULTS: Record<string, string> = {
   '--tw-inset-ring-shadow': '0 0 #0000',
   '--tw-ring-offset-shadow': '0 0 #0000',
   '--tw-ring-shadow': '0 0 #0000',
+  // 渐变位置默认值（Tailwind v4 内联样式场景无法从 localVars 中收到时的兜底）
+  '--tw-gradient-from-position': '0%',
+  '--tw-gradient-via-position': '50%',
+  '--tw-gradient-to-position': '100%',
 }
 
 export interface TailwindConversionResult {

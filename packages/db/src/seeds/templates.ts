@@ -143,6 +143,120 @@ const simplePresetConfig = {
   },
 }
 
+const sportsPresetConfig = {
+  global: {
+    themeColor: '#00A968',
+    fontFamily: 'system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif',
+    baseFontSize: 'base',
+    codeTheme: 'light',
+  },
+  variables: {
+    brandColor: '#00A968',
+    accentColor: '#f0faf5',
+    textColor: '#2c2c2c',
+  },
+  styles: {
+    // 全宽 pill 渐变背景，白字居中
+    h1: 'block px-6 py-3 rounded-[50px] bg-gradient-to-r from-[#00A968] via-[#008A56] to-[#00A968] text-white text-[22px] font-bold mt-9 mb-5 text-center tracking-[0.12em] leading-[1.4] shadow-[0_8px_20px_rgba(0,169,104,0.3)] uppercase',
+    // 左实线（品牌绿）+ 右侧圆角 + 预计算微背景色（避免 rgba 逗号问题）
+    // rgba(0,169,104,0.05)→#F2FBF7  rgba(56,198,244,0.05)→#F5FCFE
+    h2: 'pl-4 pr-4 py-[0.4em] border-l-4 [border-left-style:solid] border-l-[var(--brandColor)] bg-gradient-to-r from-[#F2FBF7] to-[#F5FCFE] text-[20px] font-semibold text-[var(--brandColor)] mt-10 mb-4 rounded-[0_12px_12px_0] tracking-[0.06em] leading-[1.4] shadow-[0_3px_8px_rgba(0,169,104,0.12)] uppercase',
+    // rgba(255,102,0,0.05)→#FFFAF7  rgba(0,169,104,0.05)→#F2FBF7
+    h3: 'pl-5 pr-4 py-[0.4em] border-l-4 [border-left-style:solid] border-l-[#FF6600] bg-gradient-to-r from-[#FFFAF7] to-[#F2FBF7] text-[18px] font-semibold text-[var(--brandColor)] mt-8 mb-3 rounded-[0_25px_25px_0] tracking-[0.08em] leading-[1.4]',
+    h4: 'text-[17px] font-semibold text-[var(--brandColor)] mt-7 mb-2 tracking-[0.04em]',
+    h5: 'text-[16px] font-semibold text-[var(--brandColor)] mt-6 mb-2',
+    h6: 'text-[15px] font-semibold text-[var(--brandColor)] mt-5 mb-2',
+    p: 'mt-0 mb-5 mx-1 leading-[1.8] tracking-[0.02em] text-[15px] text-[#2c2c2c] text-justify',
+    // 左实线橙色（渐变顶端色），浅灰背景，右圆角（border-image 微信不支持，改用实色）
+    blockquote: 'mt-0 mb-6 py-5 pr-6 pl-6 border-l-[5px] [border-left-style:solid] border-l-[#FF6600] bg-[#f8f8f8] rounded-[0_8px_8px_0] text-[#3c3c3e]',
+    // 行内代码：预计算绿蓝渐变背景（rgba→hex 避免逗号解析问题）
+    // rgba(0,169,104,0.1)→#E6F6F0  rgba(56,198,244,0.1)→#EBF9FE
+    code: 'font-mono text-[90%] text-[var(--brandColor)] bg-gradient-to-br from-[#E6F6F0] to-[#EBF9FE] px-1.5 py-0.5 rounded',
+    'code-inline': 'font-mono text-[90%] text-[var(--brandColor)] bg-gradient-to-br from-[#E6F6F0] to-[#EBF9FE] px-1.5 py-0.5 rounded',
+    // 白底代码块，顶部品牌绿实线（border-image 改为 solid，避免微信不支持）
+    pre: 'mt-0 mb-6 p-5 rounded-lg bg-white shadow-xl overflow-x-auto text-gray-800 border-t-[3px] [border-top-style:solid] border-t-[var(--brandColor)]',
+    ul: 'mt-0 mb-5 list-none p-0 leading-[1.8] text-[15px] text-[#2c2c2c]',
+    ol: 'mt-0 mb-5 list-none p-0 leading-[1.8] text-[15px] text-[#2c2c2c]',
+    li: 'my-[0.6em] leading-[1.8]',
+    // 微信不支持 background-clip: text，改用实色（避免 color:transparent 导致不可见）
+    strong: 'font-bold text-[var(--brandColor)]',
+    em: 'italic font-medium text-[var(--brandColor)]',
+    del: 'line-through text-gray-400',
+    // 三色彩虹分割线（实色渐变，渐变位置变量已在 TW_INTERNAL_DEFAULTS 中补全）
+    hr: 'my-12 border-0 h-[3px] bg-gradient-to-r from-[#FF6600] via-[#00A968] to-[#38C6F4]',
+    a: 'text-[#576b95] no-underline',
+    img: 'max-w-full h-auto my-4 rounded-xl shadow-lg',
+    // 去掉 gradient border-box（微信不支持 background-clip: border-box），改用实色边框
+    table: 'w-full my-6 border-collapse rounded-xl overflow-hidden border-2 border-[var(--brandColor)] shadow-lg text-[15px] text-[#2c2c2c]',
+    // 橙-绿预计算渐变表头（rgba→hex）
+    thead: 'bg-gradient-to-r from-[#FFF0E6] to-[#E6F6F0]',
+    // border-[rgba(255,102,0,0.2)]→#FFE0CC
+    th: 'px-4 py-3 text-left font-bold text-[var(--brandColor)] border-b-2 border-[#FFE0CC] uppercase tracking-[0.04em] text-[13px]',
+    // border-black/[0.08]→#EBEBEB
+    td: 'px-4 py-2.5 border-b border-[#EBEBEB] text-[#2c2c2c]',
+  },
+  meta: {
+    presetKey: 'sports',
+    presetName: '运动风',
+    description: '活力动感风格，橙绿双色渐变点缀，充满能量与运动感。',
+    locked: true,
+  },
+}
+
+const warmPresetConfig = {
+  global: {
+    themeColor: '#C86442',
+    fontFamily: "'PingFang SC', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif",
+    baseFontSize: 'base',
+    codeTheme: 'light',
+  },
+  variables: {
+    brandColor: '#C86442',
+    accentColor: '#fdf4ef',
+    textColor: '#222222',
+  },
+  styles: {
+    // 全宽砖红背景，白字居中，圆角，暖阴影
+    h1: 'block mx-2 px-[1.5em] py-[0.8em] bg-[var(--brandColor)] text-white text-[22px] font-bold mt-9 mb-5 text-center rounded-[8px] shadow-[0_2px_8px_rgba(200,100,66,0.2)] leading-[1.2]',
+    // 左实线 + 底虚线，均为 brandColor
+    h2: 'mt-10 mb-3 mx-2 pl-3 pb-[0.5em] border-l-4 [border-left-style:solid] border-l-[var(--brandColor)] border-b [border-bottom-style:dashed] border-b-[var(--brandColor)] text-[20px] font-bold text-[#3f3f3f] leading-[1.2]',
+    h3: 'mt-8 mb-2 mx-2 pl-3 pb-[0.4em] border-l-4 [border-left-style:solid] border-l-[var(--brandColor)] border-b [border-bottom-style:dashed] border-b-[var(--brandColor)] text-[18px] font-bold text-[#3f3f3f] leading-[1.2]',
+    h4: 'text-[17px] font-bold text-[var(--brandColor)] mt-7 mb-2 leading-[1.3]',
+    h5: 'text-[16px] font-bold text-[var(--brandColor)] mt-6 mb-2',
+    h6: 'text-[15px] font-bold text-[var(--brandColor)] mt-6 mb-2',
+    // 中文横排最优设置：两端对齐，1.75 行高，字间距
+    p: 'mt-0 mb-5 mx-2 leading-[1.75] tracking-[0.1em] text-[15px] text-[#222222] text-justify break-words',
+    // 左边框，暖灰背景，斜体，轻阴影
+    blockquote: 'mt-0 mb-6 py-4 pr-4 pl-8 border-l-4 [border-left-style:solid] border-l-[var(--brandColor)] rounded-[6px] bg-[#f7f7f7] text-[rgba(0,0,0,0.6)] italic shadow-[0_4px_6px_rgba(0,0,0,0.05)]',
+    // 行内代码：品牌色文字 + 10% 品牌色背景（#FAF0EC = rgba(200,100,66,0.1) on white）
+    code: 'font-mono text-[90%] text-[var(--brandColor)] bg-[#FAF0EC] px-1.5 py-0.5 rounded',
+    'code-inline': 'font-mono text-[90%] text-[var(--brandColor)] bg-[#FAF0EC] px-1.5 py-0.5 rounded',
+    // 代码块：暖白底，顶部品牌色实线，轻阴影
+    pre: 'mt-0 mb-5 mx-2 p-[1.2em] bg-[#fafaf9] rounded-[8px] overflow-x-auto text-[14px] leading-[1.5] border-t-[3px] [border-top-style:solid] border-t-[var(--brandColor)] shadow-[0_2px_8px_rgba(200,100,66,0.1)]',
+    ul: 'mt-0 mb-5 mx-2 pl-[1.2em] leading-[1.75] text-[15px] text-[#3f3f3f]',
+    ol: 'mt-0 mb-5 mx-2 pl-[1.2em] leading-[1.75] text-[15px] text-[#3f3f3f]',
+    li: 'my-[0.5em]',
+    strong: 'font-bold text-[var(--brandColor)]',
+    em: 'italic text-[#666666]',
+    del: 'line-through text-gray-400',
+    // 渐变淡入淡出分割线：from/to 用 transparent，via 用 hex+alpha 表示 60% 品牌色
+    hr: 'my-8 border-0 h-px bg-gradient-to-r from-transparent via-[#C8644299] to-transparent',
+    a: 'text-[#576b95] no-underline',
+    img: 'max-w-full h-auto my-4 rounded',
+    table: 'w-full my-4 border-collapse text-[15px]',
+    // 暖白灰表头
+    thead: 'bg-[#f6f6f4]',
+    th: 'border border-[#e5e5e5] px-3 py-2 text-left font-bold',
+    td: 'border border-[#e5e5e5] px-3 py-2',
+  },
+  meta: {
+    presetKey: 'warm',
+    presetName: '温暖',
+    description: '微信经典温暖风格，砖红色调，舒适易读，贴近原生公众号体验。',
+    locked: true,
+  },
+}
+
 const SEED_TEMPLATES = [
   {
     id: 'preset-classic',
@@ -160,6 +274,18 @@ const SEED_TEMPLATES = [
     id: 'preset-simple',
     name: '预置 · 简洁',
     config: simplePresetConfig,
+    isDefault: false,
+  },
+  {
+    id: 'preset-sports',
+    name: '预置 · 运动风',
+    config: sportsPresetConfig,
+    isDefault: false,
+  },
+  {
+    id: 'preset-warm',
+    name: '预置 · 温暖',
+    config: warmPresetConfig,
     isDefault: false,
   },
 ]
