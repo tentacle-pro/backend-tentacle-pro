@@ -10,6 +10,7 @@ import rehypeStringify from 'rehype-stringify'
 import { rehypeInjectStyles } from './rehype-inject-styles'
 import { rehypeWechatEnhancements } from './rehype-wechat-enhancements'
 import { rehypeWechatListBr } from './rehype-wechat-list-br'
+import { rehypeWechatRenameLists } from './rehype-wechat-rename-lists'
 import type { Plugin } from 'unified'
 import type { TemplateConfig, ConversionResult } from './types'
 
@@ -220,6 +221,7 @@ export async function convertMarkdownToHTML(
     .use(rehypeWechatListBr)
     .use(rehypeFrontmatterMeta(templateConfig))
     .use(rehypeInjectStyles, templateConfig)
+    .use(rehypeWechatRenameLists)
     .use(rehypeStringify)
 
   const result = await processor.process(markerProcessed.markdown)
