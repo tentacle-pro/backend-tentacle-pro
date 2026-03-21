@@ -9,6 +9,7 @@ import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import { rehypeInjectStyles } from './rehype-inject-styles'
 import { rehypeWechatEnhancements } from './rehype-wechat-enhancements'
+import { rehypeWechatListBr } from './rehype-wechat-list-br'
 import type { Plugin } from 'unified'
 import type { TemplateConfig, ConversionResult } from './types'
 
@@ -216,6 +217,7 @@ export async function convertMarkdownToHTML(
     .use(remarkMath)
     .use(remarkRehype)
     .use(rehypeWechatEnhancements)
+    .use(rehypeWechatListBr)
     .use(rehypeFrontmatterMeta(templateConfig))
     .use(rehypeInjectStyles, templateConfig)
     .use(rehypeStringify)
