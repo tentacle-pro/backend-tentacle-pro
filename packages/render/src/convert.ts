@@ -199,6 +199,34 @@ function rehypeFrontmatterMeta(templateConfig: TemplateConfig): Plugin {
 }
 
 /**
+ * 修复 CJK 字符紧靠加粗分隔符时 CommonMark 左临界规则失效的问题。
+ *
+ * CommonMark rule 6/7：`**` 作为左分界符，若后接 Unicode 标点（Pi/Ps，如 " " 「 （），
+ * 则要求前面是空白或标点。但 CJK 汉字属于字母类（L 类），不满足此条件，导致 remark-parse
+ * 拒绝将 `**` 识别为加粗起始符。
+ *
+ * 修复：在 CJK 字符 + `**` + Unicode Pi/Ps 标点 的边界处，插入 U+202F（窄不换行空格，
+ * Unicode Zs 类），使 `**` "前有 Unicode 空白"，rule 2b 成立，加粗恢复正常。
+ * U+202F 在 HTML 输出中表现为极细间距，对排版影响可忽略不计。
+ */
+function fixCjkBoldDelimiters(md: string): string {
+  // 需要修复的场景：CJK字符 + ** + 全角开引号/括号/书名号等 Unicode Pi/Ps 标点
+  // \u2E80-\u9FFF: CJK 统一表意文字（含扩展A/B）及各类 CJK 符号
+  // \uF900-\uFAFF: CJK 兼容表意文字
+  // \u3040-\u30FF: 平假名 / 片假名
+  // 常见中文语境下的 Pi/Ps 标点：" " ' ' （ 《 〈 【 「 『 〔 〖 等
+  const CJK = '[\\u2E80-\\u9FFF\\uF900-\\uFAFF\\u3040-\\u30FF]'
+  const OPEN_PUNCT = '[\\u201C\\u201D\\u2018\\u2019\\uFF08\\u300A\\u3008\\u3010\\u300C\\u300E\\u3014\\u3016\\u3018\\u301A]'
+  // 开始分隔符：CJK汉字 + ** + 开引号/括号 → 插入 U+202F 使 ** 前有"空白"
+  md = md.replace(new RegExp(`(${CJK})\\*\\*(?=${OPEN_PUNCT})`, 'g'), '$1\u202F**')
+  // 关闭分隔符：闭引号/括号 + ** + CJK汉字 → 插入 U+202F 使 ** 后有"空白"
+  // （保险起见同步修复，当前报告的 bug 均为开始分隔符问题）
+  const CLOSE_PUNCT = '[\\u201D\\u2019\\uFF09\\u300B\\u3009\\u3011\\u300D\\u300F\\u3015\\u3017\\u3019\\u301B]'
+  md = md.replace(new RegExp(`(${CLOSE_PUNCT})\\*\\*(?=${CJK})`, 'g'), '$1**\u202F')
+  return md
+}
+
+/**
  * 将 Markdown 转换为带内联样式的微信兼容 HTML
  */
 export async function convertMarkdownToHTML(
@@ -206,7 +234,7 @@ export async function convertMarkdownToHTML(
   templateConfig: TemplateConfig
 ): Promise<ConversionResult> {
   const markerProcessed = preprocessAssetAliasMarkers(
-    markdown,
+    fixCjkBoldDelimiters(markdown),
     templateConfig.assets || {}
   )
 
