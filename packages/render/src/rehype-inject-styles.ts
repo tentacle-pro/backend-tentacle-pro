@@ -78,6 +78,15 @@ export const rehypeInjectStyles: Plugin<[TemplateConfig]> = (config) => {
           : styleCache['code-inline'] || styleCache.code
       }
 
+      // data-role 属性支持：用于 rehype-wechat-numbered-h2 等插件生成的语义 span
+      // 例如 <span data-role="h2-num"> → 查 styleCache["h2-num"]
+      if (!styles) {
+        const role = node.properties?.['data-role'] as string | undefined
+        if (role) {
+          styles = styleCache[role]
+        }
+      }
+
       if (styles && Object.keys(styles).length > 0) {
         node.properties = node.properties || {}
         const existing = (node.properties.style as string) || ''

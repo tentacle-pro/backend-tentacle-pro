@@ -7,12 +7,13 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
-import { rehypeInjectStyles } from './rehype-inject-styles'
-import { rehypeWechatEnhancements } from './rehype-wechat-enhancements'
-import { rehypeWechatListBr } from './rehype-wechat-list-br'
-import { rehypeWechatRenameLists } from './rehype-wechat-rename-lists'
+import { rehypeInjectStyles } from './rehype-inject-styles.js'
+import { rehypeWechatEnhancements } from './rehype-wechat-enhancements.js'
+import { rehypeWechatListBr } from './rehype-wechat-list-br.js'
+import { rehypeWechatRenameLists } from './rehype-wechat-rename-lists.js'
+import { rehypeWechatNumberedH2 } from './rehype-wechat-numbered-h2.js'
 import type { Plugin } from 'unified'
-import type { TemplateConfig, ConversionResult } from './types'
+import type { TemplateConfig, ConversionResult } from './types.js'
 
 interface TreeData {
   warnings?: string[]
@@ -246,6 +247,7 @@ export async function convertMarkdownToHTML(
     .use(remarkMath)
     .use(remarkRehype)
     .use(rehypeWechatEnhancements)
+    .use(rehypeWechatNumberedH2(templateConfig))
     .use(rehypeWechatListBr)
     .use(rehypeFrontmatterMeta(templateConfig))
     .use(rehypeInjectStyles, templateConfig)

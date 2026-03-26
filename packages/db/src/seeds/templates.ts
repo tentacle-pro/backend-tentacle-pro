@@ -314,6 +314,61 @@ const elegantGreenPresetConfig = {
   },
 }
 
+const liguanPresetConfig = {
+  global: {
+    themeColor: '#994324',
+    fontFamily: "'PingFang SC', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', Arial, sans-serif",
+    baseFontSize: 'base',
+    codeTheme: 'light',
+  },
+  variables: {
+    brandColor: '#994324',
+    accentColor: '#f8f5f2',
+    textColor: '#2f2f2f',
+  },
+  styles: {
+    // H1: 居中，底部实线，砖红色
+    h1: 'table mx-auto px-4 py-1 border-b-2 border-[var(--brandColor)] text-[22px] font-bold text-gray-900 mt-8 mb-5 text-center',
+    // H2 容器：为带序号结构提供左缩进和下内边距；不带序号时退化为普通左边框样式
+    h2: 'block pl-[19px] pb-[11px] mt-14 mb-6',
+    // h2-num: 大号锈红序号，单独占一行
+    'h2-num': 'block text-[40px] text-[var(--brandColor)] font-bold leading-[1.05]',
+    // h2-title: 铜金底边框的标题文字
+    'h2-title': 'inline text-[18px] pt-[6px] text-[#2F2F2F] font-bold leading-[25px] border-b [border-bottom-style:solid] border-b-[#B08564]',
+    // H3: 左边框
+    h3: 'pl-2 border-l-[3px] [border-left-style:solid] border-l-[var(--brandColor)] text-[18px] leading-[1.3] font-bold text-gray-900 mt-8 mb-3',
+    h4: 'text-[16px] font-bold text-[var(--brandColor)] mt-7 mb-2',
+    h5: 'text-[16px] font-bold text-[var(--brandColor)] mt-6 mb-2',
+    h6: 'text-[15px] font-bold text-[var(--brandColor)] mt-6 mb-2',
+    p: 'mt-0 mb-5 mx-2 leading-[1.9] tracking-[0.04em] text-[15px] text-[#2f2f2f]',
+    blockquote: 'mt-0 mb-5 py-3 pr-4 pl-5 border-l-4 [border-left-style:solid] border-l-[var(--brandColor)] rounded text-[#2f2f2f] bg-[#f8f5f2]',
+    code: 'font-mono text-[90%] text-[var(--brandColor)] bg-[#FAF0EC] px-1.5 py-0.5 rounded',
+    'code-inline': 'font-mono text-[90%] text-[var(--brandColor)] bg-[#FAF0EC] px-1.5 py-0.5 rounded',
+    pre: 'mt-0 mb-5 mx-2 p-[1.2em] bg-[#fafaf9] rounded-[8px] overflow-x-auto text-[14px] leading-[1.5]',
+    ul: 'mt-0 mb-5 mx-2 pl-[1.2em] leading-[1.9] text-[15px] text-[#2f2f2f]',
+    ol: 'mt-0 mb-5 mx-2 pl-[1.2em] leading-[1.9] text-[15px] text-[#2f2f2f]',
+    li: 'my-1',
+    strong: 'font-bold text-[var(--brandColor)]',
+    em: 'italic text-[#666666]',
+    del: 'line-through text-gray-400',
+    // 铜金渐变分割线
+    hr: 'my-8 border-0 h-px bg-gradient-to-r from-transparent via-[#B08564] to-transparent',
+    a: 'text-[#576b95] no-underline',
+    img: 'max-w-full h-auto my-4 rounded',
+    table: 'w-full my-4 border-collapse text-[15px]',
+    thead: 'bg-[#f8f5f2]',
+    th: 'border border-[#e5e5e5] px-3 py-2 text-left font-bold text-[var(--brandColor)]',
+    td: 'border border-[#e5e5e5] px-3 py-2',
+  },
+  meta: {
+    presetKey: 'liguan',
+    presetName: '理观',
+    description: '锈红铜金配色，大号序号二级标题（## 01 标题），适合地理、自然、人文类深度长文。',
+    locked: true,
+    numberedH2: true,
+  },
+}
+
 const SEED_TEMPLATES = [
   {
     id: 'preset-classic',
@@ -349,6 +404,12 @@ const SEED_TEMPLATES = [
     id: 'preset-elegant-green',
     name: '预置 · 精致翡翠绿',
     config: elegantGreenPresetConfig,
+    isDefault: false,
+  },
+  {
+    id: 'preset-liguan',
+    name: '预置 · 理观',
+    config: liguanPresetConfig,
     isDefault: false,
   },
 ]

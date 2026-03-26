@@ -13,6 +13,8 @@ export interface TemplateMeta {
   presetName?: string
   description?: string
   locked?: boolean
+  /** 启用带序号二级标题：`## 01 标题` → 大号锈红序号 + 铜金底边框标题结构 */
+  numberedH2?: boolean
 }
 
 export interface GlobalConfig {
